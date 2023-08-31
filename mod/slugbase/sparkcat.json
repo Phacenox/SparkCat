@@ -1,0 +1,20 @@
+{
+  "id": "sparkcat",
+  "name": "Impulse",
+  "description": "Charged with electricity, <LINE> you feel most at home deep inside an iterator's can.",
+  "features": {
+    "color": "5e5efe",
+    "custom_colors": [
+      {
+        "name": "Body",
+        "story": "05067d"
+      },
+      {
+        "name": "Eyes",
+        "story": "c3c3ff"
+      }
+    ],
+    "start_room": "SS_A04",
+    "select_menu_scene": "Slugcat_Sparkcat"
+  }
+}

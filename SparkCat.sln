@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33829.357
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SparkCat", "SparkCat.csproj", "{5801C94F-D844-4717-984A-8EA910FC2FA6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Build|Any CPU = Build|Any CPU
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{5801C94F-D844-4717-984A-8EA910FC2FA6}.Build|Any CPU.ActiveCfg = Release|Any CPU
+		{5801C94F-D844-4717-984A-8EA910FC2FA6}.Build|Any CPU.Build.0 = Release|Any CPU
+		{5801C94F-D844-4717-984A-8EA910FC2FA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5801C94F-D844-4717-984A-8EA910FC2FA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5801C94F-D844-4717-984A-8EA910FC2FA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5801C94F-D844-4717-984A-8EA910FC2FA6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FA8CD698-4AA3-43D4-84F6-356C12735205}
+	EndGlobalSection
+EndGlobal
