@@ -21,17 +21,18 @@ namespace SparkCat
 
         public void OnEnable()
         {
-            On.Player.Update += UpdateHook;
-            On.Player.Destroy += DestroyHook;
-            On.PlayerGraphics.ctor += GraphicsInitHook;
-            On.PlayerGraphics.DrawSprites += PlayerGraphicsHook;
             states = new Dictionary<int, SparkCatState>();
+            On.PlayerGraphics.ctor += GraphicsInitHook;
+            On.Player.Update += UpdateHook;
+            On.PlayerGraphics.DrawSprites += PlayerGraphicsHook;
+            On.Player.Destroy += DestroyHook;
+
+            Sounds.Initialize();
         }
 
 
         private void GraphicsInitHook(On.PlayerGraphics.orig_ctor orig, PlayerGraphics self, PhysicalObject ow)
         {
-            Debug.Log("init graphic");
             if (ow is Player p)
             {
                 if (SparkJump.TryGet(p, out float jumpStrength) && jumpStrength > 0)

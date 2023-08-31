@@ -10,17 +10,17 @@ namespace SparkCat
 {
     public  class SparkCatState
     {
+        Player player;
         public SparkCatGraphics graphics;
-        const int input_frame_window = 5;
         public SparkCatState(Player player, PlayerGraphics graphics)
         {
             this.player = player;
             this.graphics = new SparkCatGraphics(graphics);
         }
-        Player player;
+        const int input_frame_window = 5;
         public float zipLength;
 
-        public int zips = 2;
+        public int zipCharges = 2;
         public float zipCooldown = 0f;
 
 
@@ -39,19 +39,23 @@ namespace SparkCat
         {
             zipDirection = direction.IntVec;
             if (player.wantToJump > 0) player.wantToJump = 0;
-            zips--;
+            zipCharges--;
             startpos = player.firstChunk.pos;
             endpos = startpos + zipDirection.ToVector2().normalized * zipLength;
             zipping = true;
             MakeZipEffect(startpos, 6, 1f, player);
             MakeZipEffect(endpos, 3, 0.6f);
-            player.room.PlaySound(SoundID.Firecracker_Bang, startpos, 0.3f + UnityEngine.Random.value * 0.3f, 0.5f + UnityEngine.Random.value * 2f);
+            player.room.PlaySound(Sounds.QuickZap, endpos, 0.3f + UnityEngine.Random.value * 0.1f, 0.5f + UnityEngine.Random.value * 2f);
             player.room.InGameNoise(new InGameNoise(endpos, 800f, player, 1f));
         }
         public void DoZip()
         {
             graphic_teleporting = false;
             zipFrame--;
+            if(zipFrame == 1)
+            {
+                player.room.AddObject(new ZipSwishEffect(player.firstChunk.pos, endpos, 5.5f, 0.4f, Color.white));
+            }
             if(zipFrame == 0)
             {
                 graphic_teleporting = true;
@@ -113,16 +117,16 @@ namespace SparkCat
         int recharge_timer = 90;
         public void ClassMechanicsSparkCat(float strength)
         {
-            if (zips >= 2)
+            if (zipCharges >= 2)
                 player.room.AddObject(new Spark(player.firstChunk.pos + Vector2.right * 4f, Vector2.right * 10f, Color.white, null, 4, 6));
-            if (zips >= 1)
+            if (zipCharges >= 1)
                 player.room.AddObject(new Spark(player.firstChunk.pos + Vector2.left * 4f, Vector2.left * 10f, Color.white, null, 4, 6));
             recharge_timer--;
-            if (recharge_timer <= 0 && zips < 2)
+            if (recharge_timer <= 0 && zipCharges < 2)
             {
                 recharge_timer = 70;
-                zips++;
-            }else if (zips == 2)
+                zipCharges++;
+            }else if (zipCharges == 2)
             {
                 recharge_timer = 70;
             }
@@ -141,31 +145,34 @@ namespace SparkCat
 
             bool flag2 = player.eatMeat >= 20 || player.maulTimer >= 15;
             if (zipping) return;
-            Debug.Log(zips);
 
-            if (desires_sparkjump && player.wantToJump > 0 && player.canJump > 0 && !player.submerged && !flag2 && (player.input[0].y < 0 || player.bodyMode == BodyModeIndex.Crawl && player.input[0].x == 0 && player.input[0].y == 0) && player.Consious)
+            if (desires_sparkjump && player.canJump > 0 && !player.submerged && !flag2 && (player.input[0].y < 0 || player.bodyMode == BodyModeIndex.Crawl && player.input[0].x == 0 && player.input[0].y == 0) && player.Consious)
             {
-                if(zips < 2)
+                Debug.Log("Desires Recharge");
+                if (zipCharges < 2)
                 {
                     Debug.Log("recharging");
-                    player.playerState.quarterFoodPoints -= 2 - zips;
-                    zips = 2;
+                    player.playerState.quarterFoodPoints -= 2 - zipCharges;
+                    zipCharges = 2;
                     MakeZipEffect(player.firstChunk.pos, 3, 0.6f, player);
-                    player.room.PlaySound(SoundID.Fire_Spear_Pop, startpos, 0.3f + UnityEngine.Random.value * 0.3f, 0.5f + UnityEngine.Random.value * 2f);
+                    player.room.PlaySound(Sounds.Recharge, startpos, 0.3f + UnityEngine.Random.value * 0.1f, 0.8f + UnityEngine.Random.value * 0.5f);
+                    player.room.InGameNoise(new InGameNoise(endpos, 200f, player, 1f));
                     zipCooldown = 5f;
                 }
                 else
                 {
-                    player.room.PlaySound(SoundID.Zapper_Zap, startpos, 0.3f + UnityEngine.Random.value * 0.3f, 0.5f + UnityEngine.Random.value * 2f);
+                    player.room.PlaySound(Sounds.NoDischarge, endpos, 0.2f + UnityEngine.Random.value * 0.1f, 0.7f + UnityEngine.Random.value * 0.4f);
+                    player.room.InGameNoise(new InGameNoise(endpos, 200f, player, 1f));
                 }
             }
-            else if (desires_sparkjump && zips > 0 && !flag2 && (player.input[0].y >= 0 || (player.input[0].y < 0 &&  player.Consious && player.bodyMode != BodyModeIndex.ClimbIntoShortCut && player.onBack == null)))
+            else if (desires_sparkjump && zipCharges > 0 && !flag2 && (player.input[0].y >= 0 || (player.input[0].y < 0 &&  player.Consious && player.bodyMode != BodyModeIndex.ClimbIntoShortCut && player.onBack == null)))
             {
                 zipCooldown = 5f;
                 Zip(player.input[0]);
             }else if (desires_sparkjump)
             {
-                player.room.PlaySound(SoundID.Zapper_Zap, startpos, 0.3f + UnityEngine.Random.value * 0.3f, 0.5f + UnityEngine.Random.value * 2f);
+                player.room.PlaySound(Sounds.NoDischarge, endpos, 0.3f + UnityEngine.Random.value * 0.1f, 0.7f + UnityEngine.Random.value * 0.4f);
+                player.room.InGameNoise(new InGameNoise(endpos, 800f, player, 1f));
             }
         }
     }

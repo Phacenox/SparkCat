@@ -1,0 +1,3 @@
+[ADD]QuickZap/ : QuickZap
+[ADD]NoDischarge/ : NoDischarge
+[ADD]Recharge/ : Recharge

@@ -65,12 +65,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Sounds.cs" />
     <Compile Include="SparkCatGraphics.cs" />
     <Compile Include="SparkCatState.cs" />
     <Compile Include="SparkCatPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Enums.cs" />
     <Compile Include="ZipFlashEffect.cs" />
+    <Compile Include="ZipSwishEffect.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

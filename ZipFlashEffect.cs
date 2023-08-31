@@ -76,8 +76,7 @@ namespace SparkCat
                 sLeaser.sprites[i].x = Mathf.Lerp(lastPos.x, pos.x, timeStacker) - camPos.x;
                 sLeaser.sprites[i].y = Mathf.Lerp(lastPos.y, pos.y, timeStacker) - camPos.y;
             }
-            float scale = curve.Evaluate((lifeTime - life - timeStacker) / lifeTime);
-            Debug.Log(scale);
+            float scale = curve.Evaluate(life - (timeStacker / lifeTime));
             sLeaser.sprites[0].alpha = scale * alpha * 0.8f;
             sLeaser.sprites[0].scale = scale * rad;
             /*
