@@ -16,6 +16,6 @@
     ],
     "start_room": "SS_A04",
     "select_menu_scene": "Slugcat_Sparkcat",
-    "spark_jump": 150.0
+    "spark_jump": 200.0
   }
 }

@@ -22,9 +22,24 @@ namespace SparkCat
         public void OnEnable()
         {
             On.Player.Update += UpdateHook;
-            On.Player.ctor += CreateHook;
             On.Player.Destroy += DestroyHook;
+            On.PlayerGraphics.ctor += GraphicsInitHook;
+            On.PlayerGraphics.DrawSprites += PlayerGraphicsHook;
             states = new Dictionary<int, SparkCatState>();
+        }
+
+
+        private void GraphicsInitHook(On.PlayerGraphics.orig_ctor orig, PlayerGraphics self, PhysicalObject ow)
+        {
+            Debug.Log("init graphic");
+            if (ow is Player p)
+            {
+                if (SparkJump.TryGet(p, out float jumpStrength) && jumpStrength > 0)
+                {
+                    states[p.playerState.playerNumber] = new SparkCatState(p, self);
+                }
+            }
+            orig(self, ow);
         }
 
         private void DestroyHook(On.Player.orig_Destroy orig, Player self)
@@ -34,23 +49,27 @@ namespace SparkCat
             orig(self);
         }
 
-        private void CreateHook(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
-        {
-            orig(self, abstractCreature, world);
-            if(SparkJump.TryGet(self, out float jumpStrength) && jumpStrength > 0)
-            {
-                states[self.playerState.playerNumber] = new SparkCatState(self);
-            }
-        }
-
         public void UpdateHook(On.Player.orig_Update orig, Player self, bool eu)
         {
             if(SparkJump.TryGet(self, out float jumpStrength) && jumpStrength > 0)
             {
                 states[self.playerState.playerNumber].ClassMechanicsSparkCat(jumpStrength);
-                states[self.playerState.playerNumber].DoSparkJump();
+                states[self.playerState.playerNumber].DoZip();
             }
             orig(self, eu);
+        }
+
+        private void PlayerGraphicsHook(On.PlayerGraphics.orig_DrawSprites orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
+        {
+            foreach(var g in states.Keys)
+            {
+                if (states[g].graphic_teleporting)
+                {
+                    orig(self, sLeaser, rCam, 1, camPos);
+                    return;
+                }
+            }
+            orig(self, sLeaser, rCam, timeStacker, camPos);
         }
     }
 }

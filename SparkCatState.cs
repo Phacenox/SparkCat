@@ -10,49 +10,59 @@ namespace SparkCat
 {
     public  class SparkCatState
     {
+        public SparkCatGraphics graphics;
         const int input_frame_window = 5;
-        public SparkCatState(Player player)
+        public SparkCatState(Player player, PlayerGraphics graphics)
         {
             this.player = player;
+            this.graphics = new SparkCatGraphics(graphics);
         }
         Player player;
         public float jumpstrength;
 
-        public int sparkJumps = 2;
-        public float sparkJumpCooldown = 0f;
+        public int zips = 2;
+        public float zipCooldown = 0f;
 
 
-        public bool sparkJumping
+        public bool zipping
         {
-            get => sparkJumpFrame > 0;
-            set => sparkJumpFrame = value ? 3 : 0;
+            get => zipFrame > 0;
+            set => zipFrame = value ? 6 : 0;
         }
         Vector2 startpos;
         Vector2 endpos;
-        public int sparkJumpFrame = 0;
+        public int zipFrame = 0;
+        public bool graphic_teleporting = false;
 
-        public void SparkJump(Player.InputPackage direction)
+        public void Zip(InputPackage direction)
         {
-            //Debug.Log(player.customPlayerGravity);
-            //player.customPlayerGravity -= 1;
             if (player.wantToJump > 0) player.wantToJump = 0;
-            player.jumpBoost = 0;
-            sparkJumps--;
+            zips--;
             startpos = player.firstChunk.pos;
             endpos = startpos + direction.IntVec.ToVector2().normalized * jumpstrength;
-            sparkJumping = true;
-            MakeSparkJumpEffect(startpos);
-            MakeSparkJumpEffect(endpos);
-            player.room.PlaySound(SoundID.Fire_Spear_Explode, startpos, 0.3f + UnityEngine.Random.value * 0.3f, 0.5f + UnityEngine.Random.value * 2f);
+            zipping = true;
+            MakeSparkJumpEffect(startpos, 6, 1f, player);
+            MakeSparkJumpEffect(endpos, 3, 0.6f);
+            player.room.PlaySound(SoundID.Firecracker_Bang, startpos, 0.3f + UnityEngine.Random.value * 0.3f, 0.5f + UnityEngine.Random.value * 2f);
             player.room.InGameNoise(new InGameNoise(endpos, 800f, player, 1f));
         }
-        public void DoSparkJump()
+        public void DoZip()
         {
-            sparkJumpFrame--;
-            if(sparkJumpFrame == 0)
+            graphic_teleporting = false;
+            zipFrame--;
+            if(zipFrame == 0)
             {
-                for(int i = 0; i < player.bodyChunks.Length; i++)
+                graphic_teleporting = true;
+                startpos = player.firstChunk.pos;
+                MakeSparkJumpEffect(startpos, 3, 0.6f);
+                MakeSparkJumpEffect(endpos, 6, 1f, player);
+                var distance = endpos -  startpos;
+                graphics.TeleportTail(distance);
+
+                for (int i = 0; i < player.bodyChunks.Length; i++)
+                {
                     player.bodyChunks[i].HardSetPosition(endpos + (player.bodyChunks[i].pos - startpos));
+                }
                 var target_vel = (endpos - startpos).normalized * 3;
                 for (int i = 0; i < player.bodyChunks.Length; i++)
                 {
@@ -79,38 +89,43 @@ namespace SparkCat
                     player.bodyChunks[0].vel.y = Mathf.Max(player.bodyChunks[0].vel.y, 1);
                     player.bodyChunks[1].vel.y = Mathf.Max(player.bodyChunks[0].vel.y, 1);
                 }
-                player.jumpBoost = 0;
-                //player.customPlayerGravity += 1;
-            }
-        }
-        public void MakeSparkJumpEffect(Vector2 where)
-        {
-            for (int i = 0; i < 4; i++)
+                /*player.customPlayerGravity -= 1;
+                for (int i = 0; i < player.bodyChunks.Length; i++)
+                {
+                    player.bodyChunks[i].vel /= 2;
+                }*/
+            }/*if(sparkJumpFrame == -5)
             {
-                player.room.AddObject(new Explosion.ExplosionSmoke(where, Custom.RNV() * 5f * UnityEngine.Random.value, 1f));
-            }
-
-            player.room.AddObject(new Explosion.ExplosionLight(where, 80f, 1f, 2, Color.white));
+                player.customPlayerGravity += 1;
+                for (int i = 0; i < player.bodyChunks.Length; i++)
+                {
+                    player.bodyChunks[i].vel *= 2;
+                }
+            }*/
+        }
+        public void MakeSparkJumpEffect(Vector2 where, float size,float alpha, Player follow = null)
+        {
+            player.room.AddObject(new ZipFlashEffect(where, size, alpha, 3, Color.white, follow));
             for (int j = 0; j < 10; j++)
             {
                 Vector2 vector = Custom.RNV();
-                player.room.AddObject(new Spark(where + vector * UnityEngine.Random.value * 10f, vector * Mathf.Lerp(4f, 30f, UnityEngine.Random.value), Color.white, null, 4, 8));
+                player.room.AddObject(new Spark(where + vector * UnityEngine.Random.value * 4f, vector * Mathf.Lerp(4f, 30f, UnityEngine.Random.value), Color.white * 0.8f, null, 4, 8));
             }
         }
         (bool, bool)[] recent_inputs = new (bool, bool)[input_frame_window];
         int recharge_timer = 90;
         public void ClassMechanicsSparkCat(float strength)
         {
-            if(sparkJumps >= 2)
+            if (zips >= 2)
                 player.room.AddObject(new Spark(player.firstChunk.pos + Vector2.right * 4f, Vector2.right * 10f, Color.white, null, 4, 6));
-            if (sparkJumps >= 1)
+            if (zips >= 1)
                 player.room.AddObject(new Spark(player.firstChunk.pos + Vector2.left * 4f, Vector2.left * 10f, Color.white, null, 4, 6));
             recharge_timer--;
-            if (recharge_timer <= 0 && sparkJumps < 2)
+            if (recharge_timer <= 0 && zips < 2)
             {
                 recharge_timer = 70;
-                sparkJumps++;
-            }else if (sparkJumps == 2)
+                zips++;
+            }else if (zips == 2)
             {
                 recharge_timer = 70;
             }
@@ -125,32 +140,32 @@ namespace SparkCat
             recent_inputs[0] = new_inputs;
 
 
-            sparkJumpCooldown--;
+            zipCooldown--;
 
             bool flag2 = player.eatMeat >= 20 || player.maulTimer >= 15;
-            if (sparkJumping) return;
-            Debug.Log(sparkJumps);
+            if (zipping) return;
+            Debug.Log(zips);
 
             if (desires_sparkjump && player.wantToJump > 0 && player.canJump > 0 && !player.submerged && !flag2 && (player.input[0].y < 0 || player.bodyMode == BodyModeIndex.Crawl && player.input[0].x == 0 && player.input[0].y == 0) && player.Consious)
             {
-                if(sparkJumps < 2)
+                if(zips < 2)
                 {
                     Debug.Log("recharging");
-                    player.playerState.quarterFoodPoints -= 2 - sparkJumps;
-                    sparkJumps = 2;
-                    MakeSparkJumpEffect(player.firstChunk.pos);
+                    player.playerState.quarterFoodPoints -= 2 - zips;
+                    zips = 2;
+                    MakeSparkJumpEffect(player.firstChunk.pos, 3, 0.6f, player);
                     player.room.PlaySound(SoundID.Fire_Spear_Pop, startpos, 0.3f + UnityEngine.Random.value * 0.3f, 0.5f + UnityEngine.Random.value * 2f);
-                    sparkJumpCooldown = 5f;
+                    zipCooldown = 5f;
                 }
                 else
                 {
                     player.room.PlaySound(SoundID.Zapper_Zap, startpos, 0.3f + UnityEngine.Random.value * 0.3f, 0.5f + UnityEngine.Random.value * 2f);
                 }
             }
-            else if (desires_sparkjump && sparkJumps > 0 && !flag2 && (player.input[0].y >= 0 || (player.input[0].y < 0 &&  player.Consious && player.bodyMode != BodyModeIndex.ClimbIntoShortCut && player.onBack == null)))
+            else if (desires_sparkjump && zips > 0 && !flag2 && (player.input[0].y >= 0 || (player.input[0].y < 0 &&  player.Consious && player.bodyMode != BodyModeIndex.ClimbIntoShortCut && player.onBack == null)))
             {
-                sparkJumpCooldown = 5f;
-                SparkJump(player.input[0]);
+                zipCooldown = 5f;
+                Zip(player.input[0]);
             }else if (desires_sparkjump)
             {
                 player.room.PlaySound(SoundID.Zapper_Zap, startpos, 0.3f + UnityEngine.Random.value * 0.3f, 0.5f + UnityEngine.Random.value * 2f);
