@@ -18,7 +18,7 @@ namespace SparkCat
             this.graphics = new SparkCatGraphics(graphics);
         }
         Player player;
-        public float jumpstrength;
+        public float zipLength;
 
         public int zips = 2;
         public float zipCooldown = 0f;
@@ -31,18 +31,20 @@ namespace SparkCat
         }
         Vector2 startpos;
         Vector2 endpos;
+        IntVector2 zipDirection;
         public int zipFrame = 0;
         public bool graphic_teleporting = false;
 
         public void Zip(InputPackage direction)
         {
+            zipDirection = direction.IntVec;
             if (player.wantToJump > 0) player.wantToJump = 0;
             zips--;
             startpos = player.firstChunk.pos;
-            endpos = startpos + direction.IntVec.ToVector2().normalized * jumpstrength;
+            endpos = startpos + zipDirection.ToVector2().normalized * zipLength;
             zipping = true;
-            MakeSparkJumpEffect(startpos, 6, 1f, player);
-            MakeSparkJumpEffect(endpos, 3, 0.6f);
+            MakeZipEffect(startpos, 6, 1f, player);
+            MakeZipEffect(endpos, 3, 0.6f);
             player.room.PlaySound(SoundID.Firecracker_Bang, startpos, 0.3f + UnityEngine.Random.value * 0.3f, 0.5f + UnityEngine.Random.value * 2f);
             player.room.InGameNoise(new InGameNoise(endpos, 800f, player, 1f));
         }
@@ -54,8 +56,10 @@ namespace SparkCat
             {
                 graphic_teleporting = true;
                 startpos = player.firstChunk.pos;
-                MakeSparkJumpEffect(startpos, 3, 0.6f);
-                MakeSparkJumpEffect(endpos, 6, 1f, player);
+                if (zipDirection == new IntVector2(0,0))
+                    endpos = startpos + Vector2.up * 3;
+                MakeZipEffect(startpos, 3, 0.6f);
+                MakeZipEffect(endpos, 6, 1f, player);
                 var distance = endpos -  startpos;
                 graphics.TeleportTail(distance);
 
@@ -83,27 +87,20 @@ namespace SparkCat
                         player.bodyChunks[i].vel.y = target_vel.y;
 
                 }
+            }
+            if(zipFrame <= 0 && zipFrame > -5)
+            {
                 //if not zero G, Y velocity is at least 1
                 if (!(player.bodyMode == BodyModeIndex.ZeroG || player.gravity <= 0.1f))
                 {
-                    player.bodyChunks[0].vel.y = Mathf.Max(player.bodyChunks[0].vel.y, 1);
-                    player.bodyChunks[1].vel.y = Mathf.Max(player.bodyChunks[0].vel.y, 1);
+                    player.bodyChunks[0].vel.y = Mathf.Max(player.bodyChunks[0].vel.y, 0f);
+                    player.bodyChunks[1].vel.y = Mathf.Max(player.bodyChunks[1].vel.y, 0f);
+                    player.customPlayerGravity = 0f;
+                    player.SetLocalAirFriction(0.7f);
                 }
-                /*player.customPlayerGravity -= 1;
-                for (int i = 0; i < player.bodyChunks.Length; i++)
-                {
-                    player.bodyChunks[i].vel /= 2;
-                }*/
-            }/*if(sparkJumpFrame == -5)
-            {
-                player.customPlayerGravity += 1;
-                for (int i = 0; i < player.bodyChunks.Length; i++)
-                {
-                    player.bodyChunks[i].vel *= 2;
-                }
-            }*/
+            }
         }
-        public void MakeSparkJumpEffect(Vector2 where, float size,float alpha, Player follow = null)
+        public void MakeZipEffect(Vector2 where, float size,float alpha, Player follow = null)
         {
             player.room.AddObject(new ZipFlashEffect(where, size, alpha, 3, Color.white, follow));
             for (int j = 0; j < 10; j++)
@@ -130,7 +127,7 @@ namespace SparkCat
                 recharge_timer = 70;
             }
 
-            jumpstrength = strength;
+            zipLength = strength;
             (bool, bool) new_inputs = (player.input[0].jmp, player.input[0].pckp);
             bool desires_sparkjump = new_inputs.Item1 && new_inputs.Item2 && (!recent_inputs[0].Item1 || !recent_inputs[0].Item2) && (!recent_inputs[recent_inputs.Length-1].Item1 && !recent_inputs[recent_inputs.Length - 1].Item2);
             for (int i = 1; i < recent_inputs.Length; i++)
@@ -153,7 +150,7 @@ namespace SparkCat
                     Debug.Log("recharging");
                     player.playerState.quarterFoodPoints -= 2 - zips;
                     zips = 2;
-                    MakeSparkJumpEffect(player.firstChunk.pos, 3, 0.6f, player);
+                    MakeZipEffect(player.firstChunk.pos, 3, 0.6f, player);
                     player.room.PlaySound(SoundID.Fire_Spear_Pop, startpos, 0.3f + UnityEngine.Random.value * 0.3f, 0.5f + UnityEngine.Random.value * 2f);
                     zipCooldown = 5f;
                 }
