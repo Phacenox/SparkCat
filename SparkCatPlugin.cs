@@ -5,6 +5,7 @@ using static SlugBase.Features.FeatureTypes;
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using IL.JollyCoop.JollyMenu;
 
 namespace SparkCat
 {
@@ -26,10 +27,12 @@ namespace SparkCat
             On.Player.Update += UpdateHook;
             On.PlayerGraphics.DrawSprites += PlayerGraphicsHook;
             On.Player.Destroy += DestroyHook;
-
-            Sounds.Initialize();
         }
 
+        public void Awake()
+        {
+            Sounds.Initialize();
+        }
 
         private void GraphicsInitHook(On.PlayerGraphics.orig_ctor orig, PlayerGraphics self, PhysicalObject ow)
         {
@@ -45,13 +48,16 @@ namespace SparkCat
 
         private void DestroyHook(On.Player.orig_Destroy orig, Player self)
         {
+            
             if (states.ContainsKey(self.playerState.playerNumber))
                 states.Remove(self.playerState.playerNumber);
+            
             orig(self);
         }
 
         public void UpdateHook(On.Player.orig_Update orig, Player self, bool eu)
         {
+            
             if(SparkJump.TryGet(self, out float jumpStrength) && jumpStrength > 0)
             {
                 states[self.playerState.playerNumber].ClassMechanicsSparkCat(jumpStrength);
@@ -62,11 +68,13 @@ namespace SparkCat
 
         private void PlayerGraphicsHook(On.PlayerGraphics.orig_DrawSprites orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
+            
             foreach(var g in states.Keys)
             {
-                if (states[g].graphic_teleporting)
+                //Debug.Log(self.player.playerState.playerNumber);
+                if (states[g].graphics.graphics.Equals(self))
                 {
-                    orig(self, sLeaser, rCam, 1, camPos);
+                    states[g].graphics.DrawSpritesOverride(orig, sLeaser, rCam, timeStacker, camPos);
                     return;
                 }
             }

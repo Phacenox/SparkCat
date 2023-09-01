@@ -10,12 +10,12 @@ namespace SparkCat
 {
     public  class SparkCatState
     {
-        Player player;
+        public Player player;
         public SparkCatGraphics graphics;
         public SparkCatState(Player player, PlayerGraphics graphics)
         {
             this.player = player;
-            this.graphics = new SparkCatGraphics(graphics);
+            this.graphics = new SparkCatGraphics(graphics, this);
         }
         const int input_frame_window = 5;
         public float zipLength;
@@ -117,10 +117,6 @@ namespace SparkCat
         int recharge_timer = 90;
         public void ClassMechanicsSparkCat(float strength)
         {
-            if (zipCharges >= 2)
-                player.room.AddObject(new Spark(player.firstChunk.pos + Vector2.right * 4f, Vector2.right * 10f, Color.white, null, 4, 6));
-            if (zipCharges >= 1)
-                player.room.AddObject(new Spark(player.firstChunk.pos + Vector2.left * 4f, Vector2.left * 10f, Color.white, null, 4, 6));
             recharge_timer--;
             if (recharge_timer <= 0 && zipCharges < 2)
             {
@@ -146,23 +142,32 @@ namespace SparkCat
             bool flag2 = player.eatMeat >= 20 || player.maulTimer >= 15;
             if (zipping) return;
 
-            if (desires_sparkjump && player.canJump > 0 && !player.submerged && !flag2 && (player.input[0].y < 0 || player.bodyMode == BodyModeIndex.Crawl && player.input[0].x == 0 && player.input[0].y == 0) && player.Consious)
+            if (desires_sparkjump && (player.canJump > 0 || player.bodyMode == BodyModeIndex.CorridorClimb)
+                && !player.submerged && !flag2
+                && ((player.input[0].y < 0 && player.bodyMode != BodyModeIndex.CorridorClimb && player.bodyMode != BodyModeIndex.ClimbingOnBeam)
+                    || (player.bodyMode == BodyModeIndex.Crawl || player.bodyMode == BodyModeIndex.CorridorClimb || player.bodyMode == BodyModeIndex.ClimbingOnBeam) && player.input[0].x == 0 && player.input[0].y == 0)
+                && player.Consious)
             {
-                Debug.Log("Desires Recharge");
+                
                 if (zipCharges < 2)
                 {
-                    Debug.Log("recharging");
                     player.playerState.quarterFoodPoints -= 2 - zipCharges;
                     zipCharges = 2;
                     MakeZipEffect(player.firstChunk.pos, 3, 0.6f, player);
-                    player.room.PlaySound(Sounds.Recharge, startpos, 0.3f + UnityEngine.Random.value * 0.1f, 0.8f + UnityEngine.Random.value * 0.5f);
-                    player.room.InGameNoise(new InGameNoise(endpos, 200f, player, 1f));
+                    player.room.PlaySound(Sounds.Recharge, player.mainBodyChunk.pos, 0.3f + UnityEngine.Random.value * 0.1f, 0.8f + UnityEngine.Random.value * 0.5f);
+                    player.room.InGameNoise(new InGameNoise(player.mainBodyChunk.pos, 200f, player, 1f));
                     zipCooldown = 5f;
                 }
                 else
                 {
-                    player.room.PlaySound(Sounds.NoDischarge, endpos, 0.2f + UnityEngine.Random.value * 0.1f, 0.7f + UnityEngine.Random.value * 0.4f);
-                    player.room.InGameNoise(new InGameNoise(endpos, 200f, player, 1f));
+                    Debug.Log(1);
+                    Debug.Log(UnityEngine.Random.value);
+                    player.room.PlaySound(Sounds.NoDischarge, player.mainBodyChunk.pos, 0.2f + UnityEngine.Random.value * 0.1f, 0.7f + UnityEngine.Random.value * 0.4f);
+                    Debug.Log(2);
+                    player.room.InGameNoise(new InGameNoise(player.mainBodyChunk.pos, 200f, player, 1f));
+
+                    Vector2 vector = Custom.RNV();
+                    player.room.AddObject(new Spark(player.firstChunk.pos + vector * UnityEngine.Random.value * 4f, vector * Mathf.Lerp(4f, 30f, UnityEngine.Random.value), Color.white * 0.8f, null, 4, 6));
                 }
             }
             else if (desires_sparkjump && zipCharges > 0 && !flag2 && (player.input[0].y >= 0 || (player.input[0].y < 0 &&  player.Consious && player.bodyMode != BodyModeIndex.ClimbIntoShortCut && player.onBack == null)))
@@ -171,8 +176,10 @@ namespace SparkCat
                 Zip(player.input[0]);
             }else if (desires_sparkjump)
             {
-                player.room.PlaySound(Sounds.NoDischarge, endpos, 0.3f + UnityEngine.Random.value * 0.1f, 0.7f + UnityEngine.Random.value * 0.4f);
-                player.room.InGameNoise(new InGameNoise(endpos, 800f, player, 1f));
+                player.room.PlaySound(Sounds.NoDischarge, player.mainBodyChunk.pos, 0.3f + UnityEngine.Random.value * 0.1f, 0.7f + UnityEngine.Random.value * 0.4f);
+                player.room.InGameNoise(new InGameNoise(player.mainBodyChunk.pos, 800f, player, 1f));
+                Vector2 vector = Custom.RNV();
+                player.room.AddObject(new Spark(player.firstChunk.pos + vector * UnityEngine.Random.value * 4f, vector * Mathf.Lerp(4f, 30f, UnityEngine.Random.value), Color.white * 0.8f, null, 4, 6));
             }
         }
     }
