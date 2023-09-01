@@ -148,11 +148,20 @@ namespace SparkCat
                     || (player.bodyMode == BodyModeIndex.Crawl || player.bodyMode == BodyModeIndex.CorridorClimb || player.bodyMode == BodyModeIndex.ClimbingOnBeam) && player.input[0].x == 0 && player.input[0].y == 0)
                 && player.Consious)
             {
-                
-                if (zipCharges < 2)
+                int quarter_foods_to_consume = 2 - zipCharges;
+                quarter_foods_to_consume = Math.Min(quarter_foods_to_consume, Math.Max(player.playerState.quarterFoodPoints, player.playerState.foodInStomach * 4));
+
+                if (zipCharges < 2 && quarter_foods_to_consume > 0)
                 {
-                    player.playerState.quarterFoodPoints -= 2 - zipCharges;
-                    zipCharges = 2;
+                    Debug.Log(quarter_foods_to_consume);
+                    Debug.Log(player.playerState.foodInStomach);
+                    Debug.Log(player.playerState.quarterFoodPoints);
+                    for(int i = 0; i < 4 - quarter_foods_to_consume; i++)
+                    {
+                        player.AddQuarterFood();
+                    }
+                    player.SubtractFood(1);
+                    zipCharges += quarter_foods_to_consume;
                     MakeZipEffect(player.firstChunk.pos, 3, 0.6f, player);
                     player.room.PlaySound(Sounds.Recharge, player.mainBodyChunk.pos, 0.3f + UnityEngine.Random.value * 0.1f, 0.8f + UnityEngine.Random.value * 0.5f);
                     player.room.InGameNoise(new InGameNoise(player.mainBodyChunk.pos, 200f, player, 1f));
@@ -160,10 +169,7 @@ namespace SparkCat
                 }
                 else
                 {
-                    Debug.Log(1);
-                    Debug.Log(UnityEngine.Random.value);
                     player.room.PlaySound(Sounds.NoDischarge, player.mainBodyChunk.pos, 0.2f + UnityEngine.Random.value * 0.1f, 0.7f + UnityEngine.Random.value * 0.4f);
-                    Debug.Log(2);
                     player.room.InGameNoise(new InGameNoise(player.mainBodyChunk.pos, 200f, player, 1f));
 
                     Vector2 vector = Custom.RNV();
