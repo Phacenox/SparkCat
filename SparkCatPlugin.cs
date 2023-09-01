@@ -39,7 +39,6 @@ namespace SparkCat
             On.Player.Destroy += DestroyHook;
             On.Player.InitiateGraphicsModule += InitGraphicsTypeHook;
 
-
             Sounds.Initialize();
         }
 

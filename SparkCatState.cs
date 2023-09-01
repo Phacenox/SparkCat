@@ -41,10 +41,24 @@ namespace SparkCat
             zipCharges--;
             startpos = player.firstChunk.pos;
             endpos = startpos + zipDirection.ToVector2().normalized * zipLength;
+
+            IntVector2 tilestart = player.room.GetTilePosition(player.firstChunk.pos);
+            IntVector2 tileend = player.room.GetTilePosition(endpos);
+            List<IntVector2> tiles = new List<IntVector2>();
+            player.room.RayTraceTilesList(tilestart.x, tilestart.y, tileend.x, tileend.y, ref tiles);
+            for (int i = 1; i < tiles.Count; i++)
+            {
+                if (player.room.GetTile(tiles[i]).Solid)
+                {
+                    endpos = player.room.MiddleOfTile(tiles[i - 1]);
+                    break;
+                }
+            }
+
             zipping = true;
             MakeZipEffect(startpos, 6, 1f, player);
             MakeZipEffect(endpos, 3, 0.6f);
-            player.room.PlaySound(Sounds.QuickZap, endpos, 0.3f + UnityEngine.Random.value * 0.1f, 0.5f + UnityEngine.Random.value * 2f);
+            player.room.PlaySound(Sounds.QuickZap, endpos, 0.3f + UnityEngine.Random.value * 0.1f, 0.8f + UnityEngine.Random.value * 1.7f);
             player.room.InGameNoise(new InGameNoise(endpos, 800f, player, 1f));
         }
         public void DoZip()
@@ -52,9 +66,8 @@ namespace SparkCat
             graphic_teleporting = false;
             zipFrame--;
             if(zipFrame == 1)
-            {
                 player.room.AddObject(new ZipSwishEffect(player.firstChunk.pos, endpos, 5.5f, 0.4f, Color.white));
-            }
+
             if(zipFrame == 0)
             {
                 graphic_teleporting = true;
@@ -64,12 +77,13 @@ namespace SparkCat
                 MakeZipEffect(startpos, 3, 0.6f);
                 MakeZipEffect(endpos, 6, 1f, player);
                 var distance = endpos -  startpos;
-                graphics.TeleportTail(distance);
 
-                for (int i = 0; i < player.bodyChunks.Length; i++)
-                {
-                    player.bodyChunks[i].HardSetPosition(endpos + (player.bodyChunks[i].pos - startpos));
-                }
+                if(player.spearOnBack != null)
+                    ObjectTeleports.TrySmoothTeleportObject(player.spearOnBack.spear, distance);
+                ObjectTeleports.TrySmoothTeleportObject(player, distance);
+                foreach (var i in player.grasps)
+                    ObjectTeleports.TrySmoothTeleportObject(i.grabbed, distance);
+
                 var target_vel = (endpos - startpos).normalized * 3;
                 for (int i = 0; i < player.bodyChunks.Length; i++)
                 {
@@ -83,14 +97,13 @@ namespace SparkCat
                     else
 
                     if (Mathf.Sign(old_vel.y) == Mathf.Sign(target_vel.y))
-                    {
                         player.bodyChunks[i].vel.y = Mathf.Sign(old_vel.y) * Mathf.Max(Mathf.Abs(old_vel.y), Mathf.Abs(target_vel.y));
-                    }
                     else
                         player.bodyChunks[i].vel.y = target_vel.y;
 
                 }
             }
+
             if(zipFrame <= 0 && zipFrame > -5)
             {
                 //if not zero G, Y velocity is at least 1
