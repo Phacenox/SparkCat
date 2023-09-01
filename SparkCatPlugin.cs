@@ -32,30 +32,40 @@ namespace SparkCat
         public void OnEnable()
         {
             states = new Dictionary<int, SparkCatState>();
-            On.PlayerGraphics.ctor += GraphicsInitHook;
-            On.Player.Update += UpdateHook;
-            On.PlayerGraphics.InitiateSprites += InitiateSpritesHook;
-            On.PlayerGraphics.DrawSprites += PlayerGraphicsHook;
-            On.PlayerGraphics.AddToContainer += PlayerAddHook;
-            On.Player.Destroy += DestroyHook;
             On.HUD.FoodMeter.QuarterPipShower.Update += QuarterPipReductionHook;
-        }
 
-        public void Awake()
-        {
+            On.Player.ctor += PlayerInitHook;
+            On.Player.Update += UpdateHook;
+            On.Player.Destroy += DestroyHook;
+            On.Player.InitiateGraphicsModule += InitGraphicsTypeHook;
+
+
             Sounds.Initialize();
         }
 
-        private void GraphicsInitHook(On.PlayerGraphics.orig_ctor orig, PlayerGraphics self, PhysicalObject ow)
+        private void PlayerInitHook(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
         {
-            if (ow is Player p)
+            orig(self, abstractCreature, world);
+            if (SparkJump.TryGet(self, out float jumpStrength) && jumpStrength > 0)
             {
-                if (SparkJump.TryGet(p, out float jumpStrength) && jumpStrength > 0)
+                states[self.playerState.playerNumber] = new SparkCatState(self);
+            }
+        }
+
+        private void InitGraphicsTypeHook(On.Player.orig_InitiateGraphicsModule orig, Player self)
+        {
+            if (SparkJump.TryGet(self, out float jumpStrength) && jumpStrength > 0)
+            {
+                if (self.graphicsModule == null)
                 {
-                    states[p.playerState.playerNumber] = new SparkCatState(p, self);
+                    self.graphicsModule = new SparkCatGraphics(self, states[self.playerState.playerNumber]);
+                    states[self.playerState.playerNumber].graphics = self.graphicsModule as SparkCatGraphics;
                 }
             }
-            orig(self, ow);
+            else
+            {
+                orig(self);
+            }
         }
 
         private void DestroyHook(On.Player.orig_Destroy orig, Player self)
@@ -76,26 +86,6 @@ namespace SparkCat
                 states[self.playerState.playerNumber].DoZip();
             }
             orig(self, eu);
-        }
-
-        private void PlayerGraphicsHook(On.PlayerGraphics.orig_DrawSprites orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
-        {
-            if(SparkJump.TryGet(self.player, out float jumpStrength) && jumpStrength > 0)
-            {
-                states[self.player.playerState.playerNumber].graphics.DrawSpritesOverride(orig, sLeaser, rCam, timeStacker, camPos);
-            }
-            else
-            {
-                orig(self, sLeaser, rCam, timeStacker, camPos);
-            }
-        }
-
-        private void InitiateSpritesHook(On.PlayerGraphics.orig_InitiateSprites orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
-        {
-            if (SparkJump.TryGet(self.player, out float jumpStrength) && jumpStrength > 0)
-            {
-                states[self.player.playerState.playerNumber].graphics.InitiateSprites(self, sLeaser, rCam);
-            }
         }
 
         private void PlayerAddHook(On.PlayerGraphics.orig_AddToContainer orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)

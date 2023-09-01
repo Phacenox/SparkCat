@@ -12,10 +12,9 @@ namespace SparkCat
     {
         public Player player;
         public SparkCatGraphics graphics;
-        public SparkCatState(Player player, PlayerGraphics graphics)
+        public SparkCatState(Player player)
         {
             this.player = player;
-            this.graphics = new SparkCatGraphics(graphics, this);
         }
         const int input_frame_window = 5;
         public float zipLength;

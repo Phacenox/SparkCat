@@ -12,23 +12,23 @@ namespace SparkCat
 {
     public class SparkCatGraphics: PlayerGraphics
     {
-        public PlayerGraphics graphics;
         public SparkCatState state;
         public LightSource myLight;
         public BodyMods bodyMods;
-        public SparkCatGraphics(PlayerGraphics graphics, SparkCatState state): base(graphics)
+        public SparkCatGraphics(Player p, SparkCatState state) : base(p)
         {
-            this.graphics = graphics;
             this.state = state;
-            bodyMods = new BodyMods(graphics, 12);
+            bodyMods = new BodyMods(this, 12);
+            tail[1].rad -= 1;
+            tail[2].rad += 1;
         }
 
         public void TeleportTail(Vector2 distance)
         {
-            for (int i = 0; i < graphics.tail.Length; i++)
+            for (int i = 0; i < tail.Length; i++)
             {
-                graphics.tail[i].pos += distance;
-                graphics.tail[i].lastPos += distance;
+                tail[i].pos += distance;
+                tail[i].lastPos += distance;
             }
         }
         float LightCounter = 0;
@@ -84,7 +84,7 @@ namespace SparkCat
                 sLeaser.sprites[10].shader = rCam.game.rainWorld.Shaders["FlatLight"];
                 if (ModManager.MSC)
                 {
-                    bodyMods.InitiateSprites(sLeaser, rCam);
+                    bodyMods.InitiateSprites(sLeaser);
 
                     if (gown != null)
                     {
@@ -92,7 +92,6 @@ namespace SparkCat
                         gown.InitiateSprite(gownIndex, sLeaser, rCam);
                     }
                 }
-
                 AddToContainer(sLeaser, rCam, null);
             }
             else
@@ -108,11 +107,11 @@ namespace SparkCat
                     fSprite.scale = owner.bodyChunks[l].rad * 2f;
                     fSprite.shader = FShader.Basic;
                 }
-            }
-
-            var ptr = typeof(PlayerGraphics).GetMethod("InitiateSprites").MethodHandle.GetFunctionPointer();
+            }/*
+            //up two levels
+            var ptr = typeof(GraphicsModule).GetMethod("InitiateSprites").MethodHandle.GetFunctionPointer();
             var baseSprites = (Func<RoomCamera.SpriteLeaser, RoomCamera, int>)Activator.CreateInstance(typeof(Action), this, ptr);
-            baseSprites(sLeaser, rCam);
+            baseSprites(sLeaser, rCam);*/
         }
 
         public override void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContainer)
@@ -124,7 +123,7 @@ namespace SparkCat
             }
             for (int i = 0; i < sLeaser.sprites.Length; i++)
             {
-                if (ModManager.MSC && i == graphics.gownIndex)
+                if (ModManager.MSC && i == gownIndex)
                 {
                     newContainer = rCam.ReturnFContainer("Items");
                     newContainer.AddChild(sLeaser.sprites[i]);
@@ -133,7 +132,7 @@ namespace SparkCat
                 {
                     if (i == 3)
                     {
-                        bodyMods.AddToContainer(sLeaser, rCam, newContainer);
+                        bodyMods.AddToContainer(sLeaser, newContainer);
                     }
 
                     if ((i <= 6 || i >= 9) && i <= 9)
@@ -156,13 +155,16 @@ namespace SparkCat
             }
         }
 
-        public void DrawSpritesOverride(On.PlayerGraphics.orig_DrawSprites orig, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
+        public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
-            bodyMods.DrawSprites(sLeaser, rCam, timeStacker, camPos);
-
             if (state.graphic_teleporting)
                 timeStacker = 1;
 
+            base.DrawSprites(sLeaser, rCam, timeStacker, camPos);
+            sLeaser.sprites[1].scaleX *= 0.9f;
+
+
+            bodyMods.DrawSprites(sLeaser, timeStacker, camPos);
 
             var default_eye_color = JollyColor(state.player.playerState.playerNumber, 1);
             if (myLight == null && state.player.room != null)
@@ -174,35 +176,33 @@ namespace SparkCat
             }
             float num = 2 + Mathf.Sin(LightCounter) * 0.2f;
             LightCounter += UnityEngine.Random.Range(0.01f, 0.1f);
-            if(myLight != null && state.player.room != null)
+            if (myLight != null && state.player.room != null)
             {
                 myLight.HardSetPos(state.player.bodyChunks[0].pos);
-                myLight.HardSetRad(12 + num * 7 + 12 * state.zipCharges/2);
-                myLight.HardSetAlpha(Mathf.Lerp(0, (0.2f + num / 4) * state.zipCharges / 2, state.player.room.Darkness(myLight.Pos)));
+                myLight.HardSetRad(12 + num * 7 + 18 * state.zipCharges / 2);
+                myLight.HardSetAlpha(Mathf.Lerp(0, (0.15f + num / 4) * state.zipCharges / 2, state.player.room.Darkness(myLight.Pos)));
             }
-            else if(myLight != null)
+            else if (myLight != null)
             {
                 myLight.Destroy();
                 myLight = null;
             }
 
-
-            orig(graphics, sLeaser, rCam, timeStacker, camPos);
             switch (state.zipCharges)
             {
                 case 0:
                     sLeaser.sprites[0].color = new Color(0.01f, 0, 0, 1);
+                    sLeaser.sprites[9].color = Color.Lerp(default_eye_color, new Color(0.01f, 0, 0, 1), 0.8f);
                     break;
                 case 1:
                     sLeaser.sprites[0].color = Color.Lerp(default_eye_color, new Color(0.01f, 0, 0, 1), 0.5f);
+                    sLeaser.sprites[9].color = Color.Lerp(default_eye_color, new Color(0.01f, 0, 0, 1), 0.4f);
                     break;
                 case 2:
                     sLeaser.sprites[0].color = default_eye_color;
+                    sLeaser.sprites[9].color = default_eye_color;
                     break;
             }
-            sLeaser.sprites[9].color = new Color(0.01f, 0, 0, 1);
-            sLeaser.sprites[10].alpha = 0f;
-            sLeaser.sprites[11].alpha = 0f;
         }
         //0: upper body/back
         //1: middle body/front
@@ -210,106 +210,99 @@ namespace SparkCat
         //3: head
         //4: legs
         //5: right arm
+        //9: face
 
         public class BodyMods
         {
-            public PlayerGraphics pGraphics;
+            public SparkCatGraphics pGraphics;
             public int numberOfSprites;
             public int startSprite;
             public int rows;
             public int lines;
 
-            public int charge;
-
-            public BodyMods(PlayerGraphics pGraphics, int startSprite)
+            public BodyMods(SparkCatGraphics pGraphics, int startSprite)
             {
                 this.pGraphics = pGraphics;
                 this.startSprite = startSprite;
 
-                rows = 8;
+                rows = 7;
                 lines = 2;
                 numberOfSprites = rows * lines;
             }
 
-            public void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContainer)
+            public void AddToContainer(RoomCamera.SpriteLeaser sLeaser, FContainer newContainer)
             {
-                if (sLeaser.sprites.Length <= 13)
-                    return;
                 for (int i = startSprite; i < startSprite + numberOfSprites; i++)
                 {
                     newContainer.AddChild(sLeaser.sprites[i]);
                 }
             }
 
-            public void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
+            AnimationCurve TailColorCurve = new AnimationCurve()
             {
-                for (int i = 0; i < rows; i++)
+                keys = new Keyframe[]
                 {
-                    float f = Mathf.InverseLerp(0f, rows - 1, i);
-                    float s = Mathf.Lerp(0.2f, 0.95f, Mathf.Pow(f, 0.8f));
+                    new Keyframe(0, 0.3f, 0, 1), new Keyframe(0.8f, 1, 0, 0), new Keyframe(1, 0.65f, 1, 0)
+                }
+            };
+
+            public void DrawSprites(RoomCamera.SpriteLeaser sLeaser, float timeStacker, Vector2 camPos)
+            {
+                for (int row = 0; row < rows; row++)
+                {
+                    float row_value = Mathf.InverseLerp(0f, rows - 1, row);
+                    float s = Mathf.Lerp(0.0f, 1f, Mathf.Pow(row_value, 0.8f));
                     PlayerSpineData playerSpineData = pGraphics.SpinePosition(s, timeStacker);
 
                     Color color = SlugcatColor(pGraphics.CharacterForColor);
 
-                    float num = 0.8f * Mathf.Pow(f, 0.5f);
+                    float num = 0.8f * Mathf.Pow(row_value, 0.5f);
                     Color color2 = Color.Lerp(color, Color.Lerp(new Color(1f, 1f, 1f), color, 0.3f), 0.2f + num);
-                    for (int j = 0; j < lines; j++)
+                    for (int line = 0; line < lines; line++)
                     {
-                        float num3 = ((float)j + ((i % 2 != 0) ? 0f : 0.5f)) / (float)(lines - 1);
-                        num3 = -1f + 2f * num3;
-                        if (num3 < -1f)
-                        {
-                            num3 += 2f;
-                        }
-                        else if (num3 > 1f)
-                        {
-                            num3 -= 2f;
-                        }
+                        float perp_on_tail_amount = 1 - 2 * line;
 
-                        num3 = Mathf.Sign(num3) * Mathf.Pow(Mathf.Abs(num3), 0.6f);
-                        Vector2 vector = playerSpineData.pos + playerSpineData.perp * (playerSpineData.rad + 0.5f) * num3;
-                        sLeaser.sprites[startSprite + i * lines + j].x = vector.x - camPos.x;
-                        sLeaser.sprites[startSprite + i * lines + j].y = vector.y - camPos.y;
-                        sLeaser.sprites[startSprite + i * lines + j].color = new Color(1f, 0f, 0f);
-                        sLeaser.sprites[startSprite + i * lines + j].rotation = Custom.VecToDeg(playerSpineData.dir);
-                        sLeaser.sprites[startSprite + i * lines + j].scaleX = Custom.LerpMap(Mathf.Abs(num3), 0.4f, 1f, 1f, 0f);
-                        sLeaser.sprites[startSprite + i * lines + j].scaleY = 1f;
+                        //perp_on_tail_amount = Mathf.Sign(perp_on_tail_amount) * Mathf.Pow(Mathf.Abs(perp_on_tail_amount), 0.6f);
+                        Vector2 vector = playerSpineData.pos + playerSpineData.perp * (playerSpineData.rad + 0.5f) * perp_on_tail_amount;
+                        sLeaser.sprites[startSprite + row * lines + line].x = vector.x - camPos.x;
+                        sLeaser.sprites[startSprite + row * lines + line].y = vector.y - camPos.y;
+                        sLeaser.sprites[startSprite + row * lines + line].rotation = Custom.VecToDeg(playerSpineData.dir);
+                        sLeaser.sprites[startSprite + row * lines + line].scaleX = 0.8f;
+                        sLeaser.sprites[startSprite + row * lines + line].scaleY = 1.5f;
+
+
 
                         if (ModManager.CoopAvailable && pGraphics.player.IsJollyPlayer)
                         {
-                            sLeaser.sprites[startSprite + i * lines + j].color = JollyColor(pGraphics.player.playerState.playerNumber, 1);
+                            sLeaser.sprites[startSprite + row * lines + line].color = JollyColor(pGraphics.player.playerState.playerNumber, 1);
                         }
                         else if (CustomColorsEnabled())
                         {
-                            sLeaser.sprites[startSprite + i * lines + j].color = CustomColorSafety(1);
+                            sLeaser.sprites[startSprite + row * lines + line].color = CustomColorSafety(1);
                         }
                         else if (pGraphics.CharacterForColor == SlugcatStats.Name.White || pGraphics.CharacterForColor == SlugcatStats.Name.Yellow)
                         {
-                            sLeaser.sprites[startSprite + i * lines + j].color = Color.gray;
+                            sLeaser.sprites[startSprite + row * lines + line].color = Color.gray;
                         }
                         else
                         {
-                            sLeaser.sprites[startSprite + i * lines + j].color = color2;
+                            sLeaser.sprites[startSprite + row * lines + line].color = color2;
                         }
+                        sLeaser.sprites[startSprite + row * lines + line].color *= TailColorCurve.Evaluate(row_value);
 
-                        if(charge == 1)
+                        if (pGraphics.state.zipCharges == 1)
                         {
-                            sLeaser.sprites[startSprite + i * lines + j].color = Color.Lerp(sLeaser.sprites[startSprite + i * lines + j].color, new Color(0.01f, 0.01f, 0.01f, 1), 0.5f);
-                        }else if(charge == 0)
+                            sLeaser.sprites[startSprite + row * lines + line].color = Color.Lerp(sLeaser.sprites[startSprite + row * lines + line].color, new Color(0.01f, 0.01f, 0.01f, 1), 0.5f);
+                        }else if(pGraphics.state.zipCharges == 0)
                         {
-                            sLeaser.sprites[startSprite + i * lines + j].color = new Color(0.01f, 0.01f, 0.01f, 1);
+                            sLeaser.sprites[startSprite + row * lines + line].color = new Color(0.01f, 0.01f, 0.01f, 0.5f);
                         }
                     }
                 }
             }
 
-            public void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
+            public void InitiateSprites(RoomCamera.SpriteLeaser sLeaser)
             {
-                var old = sLeaser.sprites;
-                sLeaser.sprites = new FSprite[sLeaser.sprites.Length + numberOfSprites];
-                old.CopyTo(sLeaser.sprites, 0);
-                Debug.Log(sLeaser.sprites);
-
                 for (int i = 0; i < rows; i++)
                 {
                     for (int j = 0; j < lines; j++)
