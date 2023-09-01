@@ -134,8 +134,48 @@ namespace SparkCat
             }
         }
 
+        int curl_side = -1;
+        public override void Update()
+        {
+
+            float stiffness = 0.35f * state.zipCharges / 2;
+            float[] best_angles_deg = new float[4]
+            {
+                20f, 20f, 15f, 10f
+            };
+
+            base.Update();
+            if (!player.dead && !player.Sleeping)
+            {
+                if(player.animation != Player.AnimationIndex.Roll && player.animation != Player.AnimationIndex.Flip)
+                {
+                    var new_curl_side = player.bodyChunks[1].pos.x < player.bodyChunks[0].pos.x ? 1 : -1;
+                    if (curl_side != new_curl_side && Mathf.Abs(player.bodyChunks[1].pos.x - player.bodyChunks[0].pos.x) > 0.5f)
+                        curl_side = new_curl_side;
+                }
+
+
+                var desired_angle = (player.bodyChunks[1].pos - player.bodyChunks[0].pos).normalized;
+                desired_angle = Custom.rotateVectorDeg(desired_angle, curl_side * best_angles_deg[0]);
+
+                for(int i = 1; i < tail.Length; i++)
+                {
+
+
+                    var desired_tail_position = (tail[i].pos - tail[i-1].pos).magnitude * desired_angle + tail[i-1].pos;
+
+                    tail[i].vel += (desired_tail_position - tail[i].pos).normalized * Mathf.Pow(Mathf.Max((desired_tail_position - tail[i].pos).magnitude, 0), 0.3f) * stiffness;
+                    tail[i].vel.y += stiffness * 0.25f * ((4 - i) / 3);
+
+                    desired_angle = (tail[i].pos - tail[i - 1].pos).normalized;
+                    desired_angle = Custom.rotateVectorDeg(desired_angle, curl_side * best_angles_deg[i]);
+                }
+            }
+        }
+
         public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
+
             if (state.graphic_teleporting)
                 timeStacker = 1;
 
