@@ -153,9 +153,6 @@ namespace SparkCat
 
                 if (zipCharges < 2 && quarter_foods_to_consume > 0)
                 {
-                    Debug.Log(quarter_foods_to_consume);
-                    Debug.Log(player.playerState.foodInStomach);
-                    Debug.Log(player.playerState.quarterFoodPoints);
                     for(int i = 0; i < 4 - quarter_foods_to_consume; i++)
                     {
                         player.AddQuarterFood();

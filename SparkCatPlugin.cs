@@ -34,7 +34,9 @@ namespace SparkCat
             states = new Dictionary<int, SparkCatState>();
             On.PlayerGraphics.ctor += GraphicsInitHook;
             On.Player.Update += UpdateHook;
+            On.PlayerGraphics.InitiateSprites += InitiateSpritesHook;
             On.PlayerGraphics.DrawSprites += PlayerGraphicsHook;
+            On.PlayerGraphics.AddToContainer += PlayerAddHook;
             On.Player.Destroy += DestroyHook;
             On.HUD.FoodMeter.QuarterPipShower.Update += QuarterPipReductionHook;
         }
@@ -86,6 +88,23 @@ namespace SparkCat
             {
                 orig(self, sLeaser, rCam, timeStacker, camPos);
             }
+        }
+
+        private void InitiateSpritesHook(On.PlayerGraphics.orig_InitiateSprites orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
+        {
+            if (SparkJump.TryGet(self.player, out float jumpStrength) && jumpStrength > 0)
+            {
+                states[self.player.playerState.playerNumber].graphics.InitiateSprites(self, sLeaser, rCam);
+            }
+        }
+
+        private void PlayerAddHook(On.PlayerGraphics.orig_AddToContainer orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
+        {
+            if (SparkJump.TryGet(self.player, out float jumpStrength) && jumpStrength > 0)
+            {
+                states[self.player.playerState.playerNumber].graphics.AddToContainer(sLeaser, rCam, newContatiner);
+            }
+            orig(self, sLeaser, rCam, newContatiner);
         }
 
         private void QuarterPipReductionHook(On.HUD.FoodMeter.QuarterPipShower.orig_Update orig, HUD.FoodMeter.QuarterPipShower self)
