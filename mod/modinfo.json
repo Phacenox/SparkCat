@@ -5,6 +5,6 @@
 	"authors": "Phace",
 	"description": ""
     "tags": ["Items", "Game Mechanics"],
-	"requirements": ["slime-cubed.slugbase", "phace.electricrubbish"],
+	"requirements": ["slime-cubed.slugbase"],
 	"requirements_names": ["SlugBase"]
 }

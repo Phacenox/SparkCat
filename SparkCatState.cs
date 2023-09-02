@@ -86,16 +86,17 @@ namespace SparkCat
                         ObjectTeleports.TrySmoothTeleportObject(i.grabbed, distance);
 
                 var target_vel = (endpos - startpos).normalized * 3;
+                if(player.bodyMode == BodyModeIndex.ZeroG || player.gravity <= 0.1f)
+                    target_vel = (endpos - startpos).normalized * 2;
+
                 for (int i = 0; i < player.bodyChunks.Length; i++)
                 {
                     var old_vel = player.bodyChunks[i].vel;
                     //no slowing down unless intent
                     if (Mathf.Sign(old_vel.x) == Mathf.Sign(target_vel.x))
-                    {
-                        player.bodyChunks[i].vel.x = target_vel.x;
                         player.bodyChunks[i].vel.x = Mathf.Sign(old_vel.x) * Mathf.Max(Mathf.Abs(old_vel.x), Mathf.Abs(target_vel.x));
-                    }
                     else
+                        player.bodyChunks[i].vel.x = target_vel.x;
 
                     if (Mathf.Sign(old_vel.y) == Mathf.Sign(target_vel.y))
                         player.bodyChunks[i].vel.y = Mathf.Sign(old_vel.y) * Mathf.Max(Mathf.Abs(old_vel.y), Mathf.Abs(target_vel.y));
