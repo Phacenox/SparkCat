@@ -82,7 +82,8 @@ namespace SparkCat
                     ObjectTeleports.TrySmoothTeleportObject(player.spearOnBack.spear, distance);
                 ObjectTeleports.TrySmoothTeleportObject(player, distance);
                 foreach (var i in player.grasps)
-                    ObjectTeleports.TrySmoothTeleportObject(i.grabbed, distance);
+                    if(i != null)
+                        ObjectTeleports.TrySmoothTeleportObject(i.grabbed, distance);
 
                 var target_vel = (endpos - startpos).normalized * 3;
                 for (int i = 0; i < player.bodyChunks.Length; i++)
