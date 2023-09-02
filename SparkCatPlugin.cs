@@ -15,7 +15,6 @@ using static Unity.IO.LowLevel.Unsafe.AsyncReadManagerMetrics;
 
 namespace SparkCat
 {
-    [BepInDependency("phace.electricrubbish", BepInDependency.DependencyFlags.SoftDependency)]
     [BepInDependency("slime-cubed.slugbase", BepInDependency.DependencyFlags.HardDependency)]
 
     [BepInPlugin(PLUGIN_GUID, PLUGIN_NAME, PLUGIN_VERSION)]

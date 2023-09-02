@@ -14,8 +14,9 @@
         "story": "c3c3ff"
       }
     ],
+	"select_menu_scene": "impulse_selectscreen",
     "start_room": "SS_A04",
-    "select_menu_scene": "Slugcat_Sparkcat",
+	"world_state": ["Spear", "Red"],
     "spark_jump": 200.0
   }
 }
