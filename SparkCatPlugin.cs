@@ -34,7 +34,6 @@ namespace SparkCat
         public void OnEnable()
         {
             states = new Dictionary<int, SparkCatState>();
-            On.HUD.FoodMeter.QuarterPipShower.Update += QuarterPipReductionHook;
 
             On.Player.ctor += PlayerInitHook;
             On.Player.Update += UpdateHook;
@@ -118,19 +117,6 @@ namespace SparkCat
                 states[self.playerState.playerNumber].DoZip();
             }
             orig(self, eu);
-        }
-
-
-        private void QuarterPipReductionHook(On.HUD.FoodMeter.QuarterPipShower.orig_Update orig, HUD.FoodMeter.QuarterPipShower self)
-        {
-            if (self.owner.hud.owner is Player p)
-            {
-                if (self.displayQuarterFood > p.playerState.quarterFoodPoints)
-                {
-                    self.Reset();
-                }
-            }
-            orig(self);
         }
     }
 }
