@@ -51,9 +51,9 @@ namespace SparkCat
         {
             if(self is Player p && SparkJump.TryGet(p, out float jumpStrength) && jumpStrength > 0)
             {
-                if(type == Creature.DamageType.Electric || source.owner is ElectricRubbish.ElectricRubbish)
+                if(type == Creature.DamageType.Electric && !(source.owner is ElectricRubbish.ElectricRubbish))
                 {
-                    states[p.playerState.playerNumber].stored_charges += 2;
+                    states[p.playerState.playerNumber].rechargeZipStorage(4);
                     damage /= 2;
                 }
             }

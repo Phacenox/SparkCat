@@ -22,8 +22,8 @@ namespace SparkCat
         public int zipCharges = 2;
         public int zipCooldown = 0;
 
-        public const int max_stored_charges = 10;
-        public int stored_charges = 10;
+        public const int max_stored_charges = 12;
+        public int stored_charges = 12;
 
         public bool zipping
         {
@@ -36,7 +36,7 @@ namespace SparkCat
         public int zipFrame = 0;
         public bool graphic_teleporting = false;
 
-        Player.Grasp[] grasps = new Creature.Grasp[2];
+        Creature.Grasp[] grasps = new Creature.Grasp[2];
         int fakeEatFood = -1;
         Rock fakeeating;
         public int tryInteractHold = 0;
@@ -88,15 +88,12 @@ namespace SparkCat
                     er.rubbishAbstract.electricCharge = 0;
                     rechargeZipStorage(4);
                 }
-                else if (stored_charges >= 4 || player.FoodInStomach > 0)
+                else if (stored_charges >= 6 || player.FoodInStomach > 0)
                 {
-                    if(stored_charges >= 4)
-                         stored_charges -= 4;
+                    if(stored_charges >= 6)
+                         stored_charges -= 6;
                     else
-                    {
                         player.SubtractFood(1);
-                        rechargeZipStorage(2);
-                    }
 
                     er.rubbishAbstract.electricCharge = 1;
                     er.room.AddObject(new ZapCoil.ZapFlash(er.firstChunk.pos, 0.5f));
@@ -226,7 +223,7 @@ namespace SparkCat
             }
         }
         (bool, bool)[] recent_inputs = new (bool, bool)[input_frame_window];
-        int recharge_timer = 50;
+        int recharge_timer = 40;
         bool grounded_since_last_zip = false;
 
         int iterator_recharge = 30;
@@ -235,7 +232,7 @@ namespace SparkCat
             this.zipLength = zipLength;
             if (player.canJump > 0)
                 grounded_since_last_zip = true;
-            if(player.bodyMode == BodyModeIndex.ZeroG || player.gravity <= 0.2f)
+            if(player.bodyMode == BodyModeIndex.ZeroG || player.gravity <= 0.2f && zipFrame < -5)
             {
                 //assume encapsulating check means inside iterator. TODO?: make more specific
                 iterator_recharge--;
@@ -252,12 +249,12 @@ namespace SparkCat
             }
             if (stored_charges > 0 && recharge_timer <= 0 && zipCharges < 2)
             {
-                recharge_timer = 50;
+                recharge_timer = 40;
                 stored_charges--;
                 zipCharges++;
             }else if (zipCharges == 2)
             {
-                recharge_timer = 50;
+                recharge_timer = 40;
             }
 
             (bool, bool) new_inputs = (player.input[0].jmp, player.input[0].pckp);
@@ -281,9 +278,8 @@ namespace SparkCat
                 && player.Consious)
             {
                 zipCooldown = 5;
-                int available_recharges = player.playerState.foodInStomach;
 
-                if (available_recharges > 0 && rechargeZipStorage(6) > 0)//short circuit
+                if (player.playerState.foodInStomach > 0 && rechargeZipStorage(6) > 0)//short circuit
                 {
                     player.SubtractFood(1);
                 }
