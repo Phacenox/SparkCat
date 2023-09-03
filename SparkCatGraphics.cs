@@ -27,6 +27,8 @@ namespace SparkCat
 
         float LightCounter = 0;
 
+        int last_charges = 0;
+
         public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
         {
             if (!owner.room.game.DEBUGMODE)
@@ -146,6 +148,7 @@ namespace SparkCat
                 desired_tail_angles_deg = new float[] { 0, 0, 0, 0 };
 
             base.Update();
+            bodyMods.Update();
             if (!player.dead && !player.Sleeping)
             {
                 if(player.animation != Player.AnimationIndex.Roll && player.animation != Player.AnimationIndex.Flip)
@@ -171,22 +174,23 @@ namespace SparkCat
                 }
             }
         }
-
+        Color electricColor;
         public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
+            electricColor = JollyColor(state.player.playerState.playerNumber, 1);
+
             if (state.graphic_teleporting)
                 timeStacker = 1;
 
             base.DrawSprites(sLeaser, rCam, timeStacker, camPos);
             sLeaser.sprites[1].scaleX *= 0.9f;
 
-            bodyMods.DrawSprites(sLeaser, timeStacker, camPos);
+            bodyMods.DrawSprites(sLeaser, timeStacker, camPos, state.zipCharges);
 
-            var default_eye_color = JollyColor(state.player.playerState.playerNumber, 1);
-            DrawLight(default_eye_color);
-
-            sLeaser.sprites[0].color = Color.Lerp(new Color(0.01f, 0.01f, 0.01f), default_eye_color, (float)state.zipCharges / 2);
-            sLeaser.sprites[9].color = Color.Lerp(new Color(0.01f, 0.01f, 0.01f), default_eye_color, (float)state.zipCharges / 2 * 0.8f + 0.2f);
+            DrawLight(electricColor);
+            sLeaser.sprites[0].color = Color.Lerp(new Color(0.01f, 0.01f, 0.01f), electricColor, (float)state.zipCharges / 2);
+            sLeaser.sprites[9].color = Color.Lerp(new Color(0.01f, 0.01f, 0.01f), electricColor, (float)state.zipCharges / 2 * 0.8f + 0.2f);
+            last_charges = state.zipCharges;
         }
 
         public void DrawLight(Color default_eye_color)
@@ -227,6 +231,8 @@ namespace SparkCat
             public int startSprite;
             public int rows;
             public int lines;
+            public float[] fluxSpeeds;
+            public float[] fluxTimers;
 
             public BodyMods(SparkCatGraphics pGraphics, int startSprite)
             {
@@ -235,6 +241,10 @@ namespace SparkCat
                 rows = 7;
                 lines = 2;
                 numberOfSprites = rows * lines;
+                fluxTimers = new float[rows];
+                fluxSpeeds = new float[rows];
+                for(int i = 0; i < fluxSpeeds.Length; i++)
+                    ResetFluxSpeed(i);
             }
 
             public void AddToContainer(RoomCamera.SpriteLeaser sLeaser, FContainer newContainer)
@@ -251,8 +261,38 @@ namespace SparkCat
                 }
             };
 
-            public void DrawSprites(RoomCamera.SpriteLeaser sLeaser, float timeStacker, Vector2 camPos)
+            public void Update()
             {
+                if (charge_anim > 0)
+                    charge_anim--;
+                for (int i = 0; i < fluxSpeeds.Length; i++)
+                {
+                    fluxTimers[i] += fluxSpeeds[i];
+                    if (fluxTimers[i] > 6.2831855f)
+                        ResetFluxSpeed(i);
+                }
+            }
+
+            public void ResetFluxSpeed(int ind)
+            {
+                fluxSpeeds[ind] = UnityEngine.Random.value * 0.2f + 0.025f;
+                while (fluxTimers[ind] > 6.2831855f)
+                {
+                    fluxTimers[ind] -= 6.2831855f;
+                }
+            }
+            int last_charges = 0;
+            int recent_charges = 0;
+            int charge_anim = 0;
+            public void DrawSprites(RoomCamera.SpriteLeaser sLeaser, float timeStacker, Vector2 camPos, int charges)
+            {
+                if(charges != recent_charges)
+                {
+                    last_charges = recent_charges;
+                    recent_charges = charges;
+                    charge_anim = 5;
+                }
+                float curve_scalar = 1 / (Mathf.Lerp(last_charges, recent_charges, Mathf.Max(5 - (charge_anim - timeStacker), 0) / 5) / 2);
                 for (int row = 0; row < rows; row++)
                 {
                     float row_value = Mathf.InverseLerp(0f, rows - 1, row);
@@ -271,17 +311,15 @@ namespace SparkCat
                         sLeaser.sprites[index].scaleX = 0.8f;
                         sLeaser.sprites[index].scaleY = 1.5f;
 
-                        if (ModManager.CoopAvailable && pGraphics.player.IsJollyPlayer)
-                            sLeaser.sprites[index].color = JollyColor(pGraphics.player.playerState.playerNumber, 1);
-                        else if (CustomColorsEnabled())
-                            sLeaser.sprites[index].color = CustomColorSafety(1);
-                        else if (pGraphics.CharacterForColor == SlugcatStats.Name.White || pGraphics.CharacterForColor == SlugcatStats.Name.Yellow)
-                            sLeaser.sprites[index].color = Color.gray;
-                        else
-                            sLeaser.sprites[index].color = Color.Lerp(SlugcatColor(pGraphics.CharacterForColor), new Color(1, 1, 1), 0.8f); ;
+                        var rBaseColor = pGraphics.electricColor;
+                        rBaseColor = Color.Lerp(rBaseColor, Color.white, Mathf.Abs(Mathf.Sin(fluxTimers[row])));
 
-                        sLeaser.sprites[index].color *= TailColorCurve.Evaluate(row_value);
-                        sLeaser.sprites[index].color = Color.Lerp(new Color(0.01f, 0.01f, 0.01f, 0.5f), sLeaser.sprites[index].color, (float)pGraphics.state.zipCharges / 2);
+                        Debug.Log(curve_scalar);
+                        if (row_value * curve_scalar > 1.1f)
+                            rBaseColor = new Color(0.01f, 0.01f, 0.01f, 0.5f);
+                        else
+                            rBaseColor = Color.Lerp(new Color(0.01f, 0.01f, 0.01f, 0.5f), rBaseColor, TailColorCurve.Evaluate(row_value * curve_scalar));
+                        sLeaser.sprites[index].color = rBaseColor;
                     }
                 }
             }

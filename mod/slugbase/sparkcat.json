@@ -19,6 +19,6 @@
     "start_room": "SS_A04",
 	"world_state": ["Spear", "Red"],
 	"can_maul": true,
-    "spark_jump": 200.0
+    "spark_jump": 140.0
   }
 }

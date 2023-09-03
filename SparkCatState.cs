@@ -221,8 +221,9 @@ namespace SparkCat
         }
         (bool, bool)[] recent_inputs = new (bool, bool)[input_frame_window];
         int recharge_timer = 60;
-        public void ClassMechanicsSparkCat(float strength)
+        public void ClassMechanicsSparkCat(float zipLength)
         {
+            this.zipLength = zipLength;
             //assumes this means inside of iterator
             if (player.bodyMode == BodyModeIndex.ZeroG || player.gravity <= 0.1f)
                 recharge_timer--;
@@ -235,7 +236,6 @@ namespace SparkCat
                 recharge_timer = 60;
             }
 
-            zipLength = strength;
             (bool, bool) new_inputs = (player.input[0].jmp, player.input[0].pckp);
             bool desires_sparkjump = new_inputs.Item1 && new_inputs.Item2 && (!recent_inputs[0].Item1 || !recent_inputs[0].Item2) && (!recent_inputs[recent_inputs.Length-1].Item1 && !recent_inputs[recent_inputs.Length - 1].Item2);
             for (int i = 1; i < recent_inputs.Length; i++)
