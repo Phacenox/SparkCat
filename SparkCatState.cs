@@ -14,6 +14,7 @@ namespace SparkCat
         public SparkCatState(Player player)
         {
             this.player = player;
+            stored_charges = max_stored_charges;
         }
         const int input_frame_window = 5;
         public float zipLength;
@@ -21,6 +22,8 @@ namespace SparkCat
         public int zipCharges = 2;
         public int zipCooldown = 0;
 
+        public const int max_stored_charges = 10;
+        public int stored_charges = 10;
 
         public bool zipping
         {
@@ -83,20 +86,20 @@ namespace SparkCat
                 if (er.rubbishAbstract.electricCharge > 0)
                 {
                     er.rubbishAbstract.electricCharge = 0;
-                    var charged = rechargeZips(2);
-                    for (int i = 0; i < 4 - charged; i++)
-                        player.AddQuarterFood();
+                    rechargeZipStorage(4);
                 }
-                else if (Math.Max(player.playerState.quarterFoodPoints, player.playerState.foodInStomach * 4) >= 4)
+                else if (stored_charges >= 4 || player.FoodInStomach > 0)
                 {
-                    player.SubtractFood(1);
-                    if (zipCharges == 2)
+                    if(stored_charges >= 4)
+                         stored_charges -= 4;
+                    else
                     {
-                        player.AddQuarterFood();
-                        zipCharges = 1;
+                        player.SubtractFood(1);
+                        rechargeZipStorage(2);
                     }
+
                     er.rubbishAbstract.electricCharge = 1;
-                    er.room.AddObject(new ZapCoil.ZapFlash(er.firstChunk.pos, 1f));
+                    er.room.AddObject(new ZapCoil.ZapFlash(er.firstChunk.pos, 0.5f));
                     er.room.PlaySound(SoundID.Zapper_Zap, er.firstChunk.pos, .3f, 1.5f + UnityEngine.Random.value * 1.5f);
                     if (er.Submersion > 0.5f)
                     {
@@ -104,12 +107,14 @@ namespace SparkCat
                     }
                     er.Spark();
                 }
+                //the eatExternalFoodSourceCounter animation ends with a food increase. counteract this.
                 player.SubtractFood(1);
             }
         }
 
         public void Zip(InputPackage direction)
         {
+            grounded_since_last_zip = false;
             zipDirection = direction.IntVec;
             if (player.wantToJump > 0) player.wantToJump = 0;
             zipCharges--;
@@ -136,12 +141,13 @@ namespace SparkCat
             player.room.InGameNoise(new InGameNoise(endpos, 800f, player, 1f));
         }
 
-        public int rechargeZips(int max_available)
+        public int rechargeZipStorage(int max_available)
         {
             if (max_available == 0) return 0;
 
-            var ret = 2 - zipCharges;
-            zipCharges = 2;
+            var ret = max_stored_charges - stored_charges;
+            ret = Mathf.Min(ret, max_available);
+            stored_charges += ret;
 
             MakeZipEffect(player.firstChunk.pos, 3, 0.6f, player);
             player.room.PlaySound(Sounds.Recharge, player.mainBodyChunk.pos, 0.3f + UnityEngine.Random.value * 0.1f, 0.8f + UnityEngine.Random.value * 0.5f);
@@ -220,20 +226,38 @@ namespace SparkCat
             }
         }
         (bool, bool)[] recent_inputs = new (bool, bool)[input_frame_window];
-        int recharge_timer = 60;
+        int recharge_timer = 50;
+        bool grounded_since_last_zip = false;
+
+        int iterator_recharge = 30;
         public void ClassMechanicsSparkCat(float zipLength)
         {
             this.zipLength = zipLength;
-            //assumes this means inside of iterator
-            if (player.bodyMode == BodyModeIndex.ZeroG || player.gravity <= 0.1f)
-                recharge_timer--;
-            if (recharge_timer <= 0 && zipCharges < 2)
+            if (player.canJump > 0)
+                grounded_since_last_zip = true;
+            if(player.bodyMode == BodyModeIndex.ZeroG || player.gravity <= 0.2f)
             {
-                recharge_timer = 60;
+                //assume encapsulating check means inside iterator. TODO?: make more specific
+                iterator_recharge--;
+                recharge_timer--;
+            }
+            else if (grounded_since_last_zip)
+            {
+                recharge_timer--;
+            }
+            if(iterator_recharge <= 0 && stored_charges < max_stored_charges)
+            {
+                stored_charges++;
+                iterator_recharge = 30;
+            }
+            if (stored_charges > 0 && recharge_timer <= 0 && zipCharges < 2)
+            {
+                recharge_timer = 50;
+                stored_charges--;
                 zipCharges++;
             }else if (zipCharges == 2)
             {
-                recharge_timer = 60;
+                recharge_timer = 50;
             }
 
             (bool, bool) new_inputs = (player.input[0].jmp, player.input[0].pckp);
@@ -257,16 +281,10 @@ namespace SparkCat
                 && player.Consious)
             {
                 zipCooldown = 5;
-                int available_recharges = Math.Max(player.playerState.quarterFoodPoints, player.playerState.foodInStomach * 4);
+                int available_recharges = player.playerState.foodInStomach;
 
-                if (zipCharges < 2 && available_recharges > 0)
+                if (available_recharges > 0 && rechargeZipStorage(6) > 0)//short circuit
                 {
-                    int consumed_food = rechargeZips(available_recharges);
-
-                    for (int i = 0; i < 4 - consumed_food; i++)
-                    {
-                        player.AddQuarterFood();
-                    }
                     player.SubtractFood(1);
                 }
                 else

@@ -53,9 +53,7 @@ namespace SparkCat
             {
                 if(type == Creature.DamageType.Electric || source.owner is ElectricRubbish.ElectricRubbish)
                 {
-                    int zips = states[p.playerState.playerNumber].rechargeZips(2);
-                    for (int i = 0; i < 4 - zips; i++)
-                        p.AddQuarterFood();
+                    states[p.playerState.playerNumber].stored_charges += 2;
                     damage /= 2;
                 }
             }

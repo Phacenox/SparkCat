@@ -1,5 +1,7 @@
 ﻿using MoreSlugcats;
 using RWCustom;
+using SlugBase.DataTypes;
+using SlugBase.Features;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,18 +18,31 @@ namespace SparkCat
         public SparkCatState state;
         public LightSource myLight;
         public BodyMods bodyMods;
+        Color baseElectricColor;
+        ElectricityColor eyeColor;
+        ElectricityColor backColor;
+
 
         public SparkCatGraphics(Player p, SparkCatState state) : base(p)
         {
             this.state = state;
+            if (CustomColorsEnabled())
+            {
+                baseElectricColor = CustomColorSafety(1);
+            }
+            else
+            {
+                baseElectricColor = PlayerColor.GetCustomColor(this, 1);
+            }
+
             bodyMods = new BodyMods(this, original_sprite_count - 1);
             tail[1].rad -= 1;
             tail[2].rad += 1;
+            eyeColor = new ElectricityColor(baseElectricColor, 0.3f);
+            backColor = new ElectricityColor(baseElectricColor);
         }
 
         float LightCounter = 0;
-
-        int last_charges = 0;
 
         public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
         {
@@ -149,6 +164,8 @@ namespace SparkCat
 
             base.Update();
             bodyMods.Update();
+            eyeColor.Update();
+            backColor.Update();
             if (!player.dead && !player.Sleeping)
             {
                 if(player.animation != Player.AnimationIndex.Roll && player.animation != Player.AnimationIndex.Flip)
@@ -174,10 +191,8 @@ namespace SparkCat
                 }
             }
         }
-        Color electricColor;
         public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
-            electricColor = JollyColor(state.player.playerState.playerNumber, 1);
 
             if (state.graphic_teleporting)
                 timeStacker = 1;
@@ -187,10 +202,10 @@ namespace SparkCat
 
             bodyMods.DrawSprites(sLeaser, timeStacker, camPos, state.zipCharges);
 
-            DrawLight(electricColor);
-            sLeaser.sprites[0].color = Color.Lerp(new Color(0.01f, 0.01f, 0.01f), electricColor, (float)state.zipCharges / 2);
-            sLeaser.sprites[9].color = Color.Lerp(new Color(0.01f, 0.01f, 0.01f), electricColor, (float)state.zipCharges / 2 * 0.8f + 0.2f);
-            last_charges = state.zipCharges;
+            DrawLight(baseElectricColor);
+
+            sLeaser.sprites[0].color = Color.Lerp(new Color(0.01f, 0.01f, 0.01f), backColor.Color, (float)state.stored_charges / SparkCatState.max_stored_charges);
+            sLeaser.sprites[9].color = Color.Lerp(new Color(0.01f, 0.01f, 0.01f), eyeColor.Color, (float)state.stored_charges / SparkCatState.max_stored_charges * 0.7f + 0.3f);
         }
 
         public void DrawLight(Color default_eye_color)
@@ -206,9 +221,11 @@ namespace SparkCat
             LightCounter += UnityEngine.Random.Range(0.01f, 0.1f);
             if (myLight != null && state.player.room != null)
             {
+                float charge_scaling = ((float)state.zipCharges / 2 + (float)state.stored_charges / SparkCatState.max_stored_charges) / 2;
+
                 myLight.HardSetPos(state.player.bodyChunks[0].pos);
-                myLight.HardSetRad(12 + num * 7 + 18 * state.zipCharges / 2);
-                myLight.HardSetAlpha(Mathf.Lerp(0, (0.15f + num / 4) * state.zipCharges / 2, state.player.room.Darkness(myLight.Pos)));
+                myLight.HardSetRad(12 + num * 7 + 22 * charge_scaling);
+                myLight.HardSetAlpha(Mathf.Lerp(0, (0.1f + num / 4) * charge_scaling, state.player.room.Darkness(myLight.Pos)));
             }
             else if (myLight != null)
             {
@@ -216,13 +233,6 @@ namespace SparkCat
                 myLight = null;
             }
         }
-        //0: upper body/back
-        //1: middle body/front
-        //2: tail
-        //3: head
-        //4: legs
-        //5: right arm
-        //9: face
 
         public class BodyMods
         {
@@ -231,8 +241,7 @@ namespace SparkCat
             public int startSprite;
             public int rows;
             public int lines;
-            public float[] fluxSpeeds;
-            public float[] fluxTimers;
+            public ElectricityColor[] fluxes;
 
             public BodyMods(SparkCatGraphics pGraphics, int startSprite)
             {
@@ -241,10 +250,9 @@ namespace SparkCat
                 rows = 7;
                 lines = 2;
                 numberOfSprites = rows * lines;
-                fluxTimers = new float[rows];
-                fluxSpeeds = new float[rows];
-                for(int i = 0; i < fluxSpeeds.Length; i++)
-                    ResetFluxSpeed(i);
+                fluxes = new ElectricityColor[numberOfSprites];
+                for (int i = 0; i < fluxes.Length; i++)
+                    fluxes[i] = new ElectricityColor(pGraphics.baseElectricColor);
             }
 
             public void AddToContainer(RoomCamera.SpriteLeaser sLeaser, FContainer newContainer)
@@ -265,22 +273,10 @@ namespace SparkCat
             {
                 if (charge_anim > 0)
                     charge_anim--;
-                for (int i = 0; i < fluxSpeeds.Length; i++)
-                {
-                    fluxTimers[i] += fluxSpeeds[i];
-                    if (fluxTimers[i] > 6.2831855f)
-                        ResetFluxSpeed(i);
-                }
+                foreach (var i in fluxes)
+                    i.Update();
             }
 
-            public void ResetFluxSpeed(int ind)
-            {
-                fluxSpeeds[ind] = UnityEngine.Random.value * 0.2f + 0.025f;
-                while (fluxTimers[ind] > 6.2831855f)
-                {
-                    fluxTimers[ind] -= 6.2831855f;
-                }
-            }
             int last_charges = 0;
             int recent_charges = 0;
             int charge_anim = 0;
@@ -311,10 +307,8 @@ namespace SparkCat
                         sLeaser.sprites[index].scaleX = 0.8f;
                         sLeaser.sprites[index].scaleY = 1.5f;
 
-                        var rBaseColor = pGraphics.electricColor;
-                        rBaseColor = Color.Lerp(rBaseColor, Color.white, Mathf.Abs(Mathf.Sin(fluxTimers[row])));
+                        var rBaseColor = fluxes[row].Color;
 
-                        Debug.Log(curve_scalar);
                         if (row_value * curve_scalar > 1.1f)
                             rBaseColor = new Color(0.01f, 0.01f, 0.01f, 0.5f);
                         else
@@ -330,6 +324,44 @@ namespace SparkCat
                     for (int j = 0; j < lines; j++)
                         sLeaser.sprites[startSprite + i * lines + j] = new FSprite("tinyStar");
             }
+        }
+        public class ElectricityColor
+        {
+            public float speedscalar = 1.0f;
+            float fluxSpeed;
+            float fluxTimer;
+            Color _color;
+            public Color Color
+            {
+                get
+                {
+                    return Color.Lerp(_color, Color.white, Mathf.Abs(Mathf.Sin(fluxTimer)));
+                }
+                set { _color = value; }
+            }
+
+            public ElectricityColor(Color color, float speedscalar = 1.0f)
+            {
+                _color = color;
+                this.speedscalar = speedscalar;
+                ResetFluxSpeed();
+            }
+            const float resetovercap = 6.2831855f;
+            public void ResetFluxSpeed()
+            {
+                fluxSpeed = UnityEngine.Random.value * 0.2f + 0.025f;
+                while (fluxTimer > resetovercap)
+                {
+                    fluxTimer -= resetovercap;
+                }
+            }
+            public void Update()
+            {
+                fluxTimer += fluxSpeed * speedscalar;
+                if (fluxTimer > resetovercap)
+                    ResetFluxSpeed();
+            }
+
         }
     }
 }
