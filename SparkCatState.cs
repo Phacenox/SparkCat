@@ -131,8 +131,9 @@ namespace SparkCat
 
                         SetCharge(fakeeating, 1);
 
-                        fakeeating.room.AddObject(new ZapCoil.ZapFlash(fakeeating.firstChunk.pos, 0.5f));
-                        fakeeating.room.PlaySound(SoundID.Zapper_Zap, fakeeating.firstChunk.pos, .3f, 1.5f + UnityEngine.Random.value * 1.5f);
+                        player.room.AddObject(new ZapCoil.ZapFlash(fakeeating.firstChunk.pos, 0.5f));
+                        player.room.PlaySound(SoundID.Zapper_Zap, fakeeating.firstChunk.pos, .3f, 1.5f + UnityEngine.Random.value * 1.5f);
+                        player.room.PlaySound(SoundID.Rock_Hit_Creature, fakeeating.firstChunk, false, 0.6f, 1);
                         if (fakeeating.Submersion > 0.5f)
                             fakeeating.room.AddObject(new UnderwaterShock(fakeeating.room, null, fakeeating.firstChunk.pos, 10, 800f, 2f, player, new Color(0.8f, 0.8f, 1f)));
 

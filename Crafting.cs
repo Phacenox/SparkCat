@@ -15,7 +15,7 @@ namespace SparkCat
         {
             if (self is Player p && Plugin.SparkJump.TryGet(p, out float jumpStrength) && jumpStrength > 0)
             {
-                return self.input[0].y == 1 && self.CraftingResults() != null;
+                return self.input[0].y == 1 && self.CraftingResults() == AbstractPhysicalObject.AbstractObjectType.Spear || self.CraftingResults() != null;
             }
             return orig(self);
         }
@@ -46,7 +46,8 @@ namespace SparkCat
 
             if (self is Player p && Plugin.SparkJump.TryGet(p, out float jumpStrength) && jumpStrength > 0)
             {
-                self.room.PlaySound(SoundID.Spear_Stick_In_Ground, self.firstChunk);
+                self.room.PlaySound(Sounds.NoDischarge, self.mainBodyChunk.pos, 0.2f + UnityEngine.Random.value * 0.1f, 0.7f + UnityEngine.Random.value * 0.4f);
+                self.room.PlaySound(SoundID.Rock_Hit_Creature, self.mainBodyChunk, false, 0.4f, 1);
                 if (self.grasps[0] == null || self.grasps[1] == null)
                     return;
                 var phys1 = self.grasps[0].grabbed.abstractPhysicalObject;
