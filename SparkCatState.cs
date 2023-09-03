@@ -179,18 +179,18 @@ namespace SparkCat
                 if (Mathf.Abs(target_vel.y) < 0.7f)
                     target_vel.y = 0.1f * Mathf.Sign(player.bodyChunks[0].vel.y);
                 if (player.bodyMode == BodyModeIndex.ZeroG || player.gravity <= 0.1f)
-                    target_vel = (endpos - startpos).normalized * 4;
+                    target_vel = zipDirection.ToVector2().normalized * 4;
 
                 for (int i = 0; i < player.bodyChunks.Length; i++)
                 {
                     var old_vel = player.bodyChunks[i].vel;
                     //no slowing down unless intent
-                    if (Mathf.Sign(old_vel.x) == Mathf.Sign(target_vel.x))
+                    if (Mathf.Sign(old_vel.x) == Mathf.Sign(target_vel.x) && !(Mathf.Abs(target_vel.x) < 0.01f))
                         player.bodyChunks[i].vel.x = Mathf.Sign(old_vel.x) * Mathf.Max(Mathf.Abs(old_vel.x), Mathf.Abs(target_vel.x));
                     else
                         player.bodyChunks[i].vel.x = target_vel.x;
 
-                    if (Mathf.Sign(old_vel.y) == Mathf.Sign(target_vel.y))
+                    if (Mathf.Sign(old_vel.y) == Mathf.Sign(target_vel.y) && !(Mathf.Abs(target_vel.y) < 0.01f))
                         player.bodyChunks[i].vel.y = Mathf.Sign(old_vel.y) * Mathf.Max(Mathf.Abs(old_vel.y), Mathf.Abs(target_vel.y));
                     else
                         player.bodyChunks[i].vel.y = target_vel.y;
@@ -220,7 +220,7 @@ namespace SparkCat
             }
         }
         (bool, bool)[] recent_inputs = new (bool, bool)[input_frame_window];
-        int recharge_timer = 90;
+        int recharge_timer = 60;
         public void ClassMechanicsSparkCat(float strength)
         {
             //assumes this means inside of iterator
@@ -228,11 +228,11 @@ namespace SparkCat
                 recharge_timer--;
             if (recharge_timer <= 0 && zipCharges < 2)
             {
-                recharge_timer = 70;
+                recharge_timer = 60;
                 zipCharges++;
             }else if (zipCharges == 2)
             {
-                recharge_timer = 70;
+                recharge_timer = 60;
             }
 
             zipLength = strength;

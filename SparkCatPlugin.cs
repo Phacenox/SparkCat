@@ -44,7 +44,6 @@ namespace SparkCat
             On.Player.GrabUpdate += PlayerGrabHook;
             On.Creature.Violence += CreatureViolenceHook;
 
-
             Sounds.Initialize();
         }
 
