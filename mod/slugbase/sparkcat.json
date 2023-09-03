@@ -1,7 +1,7 @@
 {
   "id": "sparkcat",
-  "name": "Impulse",
-  "description": "Charged with electricity, <LINE> you feel most at home deep inside an iterator's can.",
+  "name": "The Impulse",
+  "description": "Charged with electricity; <LINE> you feel most at home deep inside an iterator's can.",
   "features": {
     "color": "5e5efe",
     "custom_colors": [
@@ -15,8 +15,10 @@
       }
     ],
 	"select_menu_scene": "impulse_selectscreen",
+	"sleep_scene": "impulse_sleepscreen",
     "start_room": "SS_A04",
 	"world_state": ["Spear", "Red"],
+	"can_maul": true,
     "spark_jump": 200.0
   }
 }

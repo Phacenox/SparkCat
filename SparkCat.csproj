@@ -26,7 +26,7 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>mod\plugins\</OutputPath>
-    <DefineConstants>TRACE;/debug:none</DefineConstants>
+    <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -34,6 +34,9 @@
     <Reference Include="BepInEx">
       <HintPath>..\References\BepInEx.dll</HintPath>
       <Private>False</Private>
+    </Reference>
+    <Reference Include="Electric Rubbish">
+      <HintPath>..\ElectricRubbish\mod\plugins\Electric Rubbish.dll</HintPath>
     </Reference>
     <Reference Include="HOOKS-Assembly-CSharp">
       <HintPath>..\References\HOOKS-Assembly-CSharp.dll</HintPath>

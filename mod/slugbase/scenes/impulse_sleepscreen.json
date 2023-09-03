@@ -1,0 +1,15 @@
+{
+	"id": "impulse_sleepscreen",
+	"scene_folder": "scenes/impulse-sleep",
+	"images": [
+		{ "name": "farback", "pos": [672, 236], "depth": 3.2, "shader": "LightEdges" },
+		{ "name": "grass1",    "pos": [674, 138], "depth": 3.0, "shader": "LightEdges" },
+		{ "name": "grass2",    "pos": [710, 120], "depth": 2.6, "shader": "LightEdges" },
+		{ "name": "slug",    "pos": [805, 79], "depth": 2.2, "shader": "LightEdges" },
+		{ "name": "foreground",    "pos": [486, -54], "depth": 1.6, "shader": "LightEdges" }
+	],
+	"idle_depths": [ 3.0 ],
+	"glow_pos": [688, 484],
+	"mark_pos": [689, 583],
+	"slugcat_depth": 3.0
+}

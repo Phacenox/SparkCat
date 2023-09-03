@@ -11,7 +11,6 @@ namespace SparkCat
     public  class SparkCatState
     {
         public Player player;
-        public SparkCatGraphics graphics;
         public SparkCatState(Player player)
         {
             this.player = player;
@@ -20,7 +19,7 @@ namespace SparkCat
         public float zipLength;
 
         public int zipCharges = 2;
-        public float zipCooldown = 0f;
+        public int zipCooldown = 0;
 
 
         public bool zipping
@@ -33,6 +32,81 @@ namespace SparkCat
         IntVector2 zipDirection;
         public int zipFrame = 0;
         public bool graphic_teleporting = false;
+
+        Player.Grasp[] grasps = new Creature.Grasp[2];
+        int fakeEatFood = -1;
+        Rock fakeeating;
+        public int tryInteractHold = 0;
+        public void GrabHook(On.Player.orig_GrabUpdate orig, Player self, bool eu)
+        {
+            orig(self, eu);
+            if (grasps[0] != self.grasps[0] ||  grasps[1] != self.grasps[1] )
+                tryInteractHold = -1;
+            grasps[0] = self.grasps[0];
+            grasps[1] = self.grasps[1];
+            if (tryInteractHold == 0 && self.input[0].pckp && !self.input[1].pckp)
+                tryInteractHold = 10;
+            if (tryInteractHold >= 0 && !self.input[0].pckp || zipCooldown > 0)
+                tryInteractHold = 0;
+
+            if(tryInteractHold > 0)
+            {
+                tryInteractHold--;
+                if (tryInteractHold == 0 && zipCooldown == 0)
+                {
+                    if (self.grasps[0] != null && self.grasps[0].grabbed is ElectricRubbish.ElectricRubbish er)
+                    {
+                        self.eatExternalFoodSourceCounter = 4;
+                        self.handOnExternalFoodSource = self.grasps[0].grabbed.bodyChunks[0].pos;
+                        fakeEatFood = 4;
+                        fakeeating = er;
+                    }
+                    else if (self.grasps[1] != null && self.grasps[1].grabbed is ElectricRubbish.ElectricRubbish er2)
+                    {
+                        self.eatExternalFoodSourceCounter = 4;
+                        self.handOnExternalFoodSource = self.grasps[1].grabbed.bodyChunks[0].pos;
+                        fakeEatFood = 4;
+                        fakeeating = er2;
+                    }
+                }
+            }else if(tryInteractHold < 0)
+            {
+                tryInteractHold++;
+            }
+        }
+
+        public void Update()
+        {
+            fakeEatFood--;
+            if (fakeEatFood == 0 && fakeeating != null && fakeeating is ElectricRubbish.ElectricRubbish er)
+            {
+                if (er.rubbishAbstract.electricCharge > 0)
+                {
+                    er.rubbishAbstract.electricCharge = 0;
+                    var charged = rechargeZips(2);
+                    for (int i = 0; i < 4 - charged; i++)
+                        player.AddQuarterFood();
+                }
+                else if (Math.Max(player.playerState.quarterFoodPoints, player.playerState.foodInStomach * 4) >= 4)
+                {
+                    player.SubtractFood(1);
+                    if (zipCharges == 2)
+                    {
+                        player.AddQuarterFood();
+                        zipCharges = 1;
+                    }
+                    er.rubbishAbstract.electricCharge = 1;
+                    er.room.AddObject(new ZapCoil.ZapFlash(er.firstChunk.pos, 1f));
+                    er.room.PlaySound(SoundID.Zapper_Zap, er.firstChunk.pos, .3f, 1.5f + UnityEngine.Random.value * 1.5f);
+                    if (er.Submersion > 0.5f)
+                    {
+                        er.room.AddObject(new UnderwaterShock(er.room, null, er.firstChunk.pos, 10, 800f, 2f, player, new Color(0.8f, 0.8f, 1f)));
+                    }
+                    er.Spark();
+                }
+                player.SubtractFood(1);
+            }
+        }
 
         public void Zip(InputPackage direction)
         {
@@ -61,6 +135,20 @@ namespace SparkCat
             player.room.PlaySound(Sounds.QuickZap, endpos, 0.3f + UnityEngine.Random.value * 0.1f, 0.8f + UnityEngine.Random.value * 1.7f);
             player.room.InGameNoise(new InGameNoise(endpos, 800f, player, 1f));
         }
+
+        public int rechargeZips(int max_available)
+        {
+            if (max_available == 0) return 0;
+
+            var ret = 2 - zipCharges;
+            zipCharges = 2;
+
+            MakeZipEffect(player.firstChunk.pos, 3, 0.6f, player);
+            player.room.PlaySound(Sounds.Recharge, player.mainBodyChunk.pos, 0.3f + UnityEngine.Random.value * 0.1f, 0.8f + UnityEngine.Random.value * 0.5f);
+            player.room.InGameNoise(new InGameNoise(player.mainBodyChunk.pos, 200f, player, 1f));
+            return ret;
+        }
+
         public void DoZip()
         {
             graphic_teleporting = false;
@@ -78,6 +166,8 @@ namespace SparkCat
                 MakeZipEffect(endpos, 6, 1f, player);
                 var distance = endpos -  startpos;
 
+                if (player.slugOnBack != null && player.slugOnBack.HasASlug)
+                    ObjectTeleports.TrySmoothTeleportObject(player.slugOnBack.slugcat, distance);
                 if(player.spearOnBack != null)
                     ObjectTeleports.TrySmoothTeleportObject(player.spearOnBack.spear, distance);
                 ObjectTeleports.TrySmoothTeleportObject(player, distance);
@@ -86,8 +176,10 @@ namespace SparkCat
                         ObjectTeleports.TrySmoothTeleportObject(i.grabbed, distance);
 
                 var target_vel = (endpos - startpos).normalized * 3;
-                if(player.bodyMode == BodyModeIndex.ZeroG || player.gravity <= 0.1f)
-                    target_vel = (endpos - startpos).normalized * 2;
+                if (Mathf.Abs(target_vel.y) < 0.7f)
+                    target_vel.y = 0.1f * Mathf.Sign(player.bodyChunks[0].vel.y);
+                if (player.bodyMode == BodyModeIndex.ZeroG || player.gravity <= 0.1f)
+                    target_vel = (endpos - startpos).normalized * 4;
 
                 for (int i = 0; i < player.bodyChunks.Length; i++)
                 {
@@ -131,7 +223,9 @@ namespace SparkCat
         int recharge_timer = 90;
         public void ClassMechanicsSparkCat(float strength)
         {
-            recharge_timer--;
+            //assumes this means inside of iterator
+            if (player.bodyMode == BodyModeIndex.ZeroG || player.gravity <= 0.1f)
+                recharge_timer--;
             if (recharge_timer <= 0 && zipCharges < 2)
             {
                 recharge_timer = 70;
@@ -150,33 +244,30 @@ namespace SparkCat
             }
             recent_inputs[0] = new_inputs;
 
-
-            zipCooldown--;
+            if(zipCooldown > 0)
+                zipCooldown--;
 
             bool flag2 = player.eatMeat >= 20 || player.maulTimer >= 15;
             if (zipping) return;
 
-            if (desires_sparkjump && (player.canJump > 0 || player.bodyMode == BodyModeIndex.CorridorClimb)
+            if (zipCooldown == 0 && desires_sparkjump && (player.canJump > 0 || player.bodyMode == BodyModeIndex.CorridorClimb)
                 && !player.submerged && !flag2
                 && ((player.input[0].y < 0 && player.bodyMode != BodyModeIndex.CorridorClimb && player.bodyMode != BodyModeIndex.ClimbingOnBeam)
                     || (player.bodyMode == BodyModeIndex.Crawl || player.bodyMode == BodyModeIndex.CorridorClimb || player.bodyMode == BodyModeIndex.ClimbingOnBeam) && player.input[0].x == 0 && player.input[0].y == 0)
                 && player.Consious)
             {
-                int quarter_foods_to_consume = 2 - zipCharges;
-                quarter_foods_to_consume = Math.Min(quarter_foods_to_consume, Math.Max(player.playerState.quarterFoodPoints, player.playerState.foodInStomach * 4));
+                zipCooldown = 5;
+                int available_recharges = Math.Max(player.playerState.quarterFoodPoints, player.playerState.foodInStomach * 4);
 
-                if (zipCharges < 2 && quarter_foods_to_consume > 0)
+                if (zipCharges < 2 && available_recharges > 0)
                 {
-                    for(int i = 0; i < 4 - quarter_foods_to_consume; i++)
+                    int consumed_food = rechargeZips(available_recharges);
+
+                    for (int i = 0; i < 4 - consumed_food; i++)
                     {
                         player.AddQuarterFood();
                     }
                     player.SubtractFood(1);
-                    zipCharges += quarter_foods_to_consume;
-                    MakeZipEffect(player.firstChunk.pos, 3, 0.6f, player);
-                    player.room.PlaySound(Sounds.Recharge, player.mainBodyChunk.pos, 0.3f + UnityEngine.Random.value * 0.1f, 0.8f + UnityEngine.Random.value * 0.5f);
-                    player.room.InGameNoise(new InGameNoise(player.mainBodyChunk.pos, 200f, player, 1f));
-                    zipCooldown = 5f;
                 }
                 else
                 {
@@ -187,12 +278,13 @@ namespace SparkCat
                     player.room.AddObject(new Spark(player.firstChunk.pos + vector * UnityEngine.Random.value * 4f, vector * Mathf.Lerp(4f, 30f, UnityEngine.Random.value), Color.white * 0.8f, null, 4, 6));
                 }
             }
-            else if (desires_sparkjump && zipCharges > 0 && !flag2 && (player.input[0].y >= 0 || (player.input[0].y < 0 &&  player.Consious && player.bodyMode != BodyModeIndex.ClimbIntoShortCut && player.onBack == null)))
+            else if (zipCooldown == 0 && desires_sparkjump && zipCharges > 0 && !flag2 && (player.input[0].y >= 0 || (player.input[0].y < 0 &&  player.Consious && player.bodyMode != BodyModeIndex.ClimbIntoShortCut && player.onBack == null)))
             {
-                zipCooldown = 5f;
+                zipCooldown = 5;
                 Zip(player.input[0]);
-            }else if (desires_sparkjump)
+            }else if (zipCooldown == 0 && desires_sparkjump)
             {
+                zipCooldown = 5;
                 player.room.PlaySound(Sounds.NoDischarge, player.mainBodyChunk.pos, 0.3f + UnityEngine.Random.value * 0.1f, 0.7f + UnityEngine.Random.value * 0.4f);
                 player.room.InGameNoise(new InGameNoise(player.mainBodyChunk.pos, 800f, player, 1f));
                 Vector2 vector = Custom.RNV();

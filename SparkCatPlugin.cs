@@ -9,9 +9,12 @@ using IL.JollyCoop.JollyMenu;
 using System.Security;
 using System.Security.Permissions;
 using static Unity.IO.LowLevel.Unsafe.AsyncReadManagerMetrics;
+using IL.MoreSlugcats;
 
 [module: UnverifiableCode]
+#pragma warning disable CS0618 // Type or member is obsolete
 [assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
+#pragma warning restore CS0618 // Type or member is obsolete
 
 namespace SparkCat
 {
@@ -38,7 +41,38 @@ namespace SparkCat
             On.Player.Destroy += DestroyHook;
             On.Player.InitiateGraphicsModule += InitGraphicsTypeHook;
 
+            On.Player.GrabUpdate += PlayerGrabHook;
+            On.Creature.Violence += CreatureViolenceHook;
+
+
             Sounds.Initialize();
+        }
+
+        private void CreatureViolenceHook(On.Creature.orig_Violence orig, Creature self, BodyChunk source, Vector2? directionAndMomentum, BodyChunk hitChunk, PhysicalObject.Appendage.Pos hitAppendage, Creature.DamageType type, float damage, float stunBonus)
+        {
+            if(self is Player p && SparkJump.TryGet(p, out float jumpStrength) && jumpStrength > 0)
+            {
+                if(type == Creature.DamageType.Electric || source.owner is ElectricRubbish.ElectricRubbish)
+                {
+                    int zips = states[p.playerState.playerNumber].rechargeZips(2);
+                    for (int i = 0; i < 4 - zips; i++)
+                        p.AddQuarterFood();
+                    damage /= 2;
+                }
+            }
+            orig(self, source, directionAndMomentum, hitChunk, hitAppendage, type, damage, stunBonus);
+        }
+
+        private void PlayerGrabHook(On.Player.orig_GrabUpdate orig, Player self, bool eu)
+        {
+            if (SparkJump.TryGet(self, out float jumpStrength) && jumpStrength > 0)
+            {
+                states[self.playerState.playerNumber].GrabHook(orig, self, eu);
+            }
+            else
+            {
+                orig(self, eu);
+            }
         }
 
         private void PlayerInitHook(On.Player.orig_ctor orig, Player self, AbstractCreature abstractCreature, World world)
@@ -52,13 +86,10 @@ namespace SparkCat
 
         private void InitGraphicsTypeHook(On.Player.orig_InitiateGraphicsModule orig, Player self)
         {
-            if (SparkJump.TryGet(self, out float jumpStrength) && jumpStrength > 0)
+            if(self.SlugCatClass.value == "sparkcat")
             {
                 if (self.graphicsModule == null)
-                {
                     self.graphicsModule = new SparkCatGraphics(self, states[self.playerState.playerNumber]);
-                    states[self.playerState.playerNumber].graphics = self.graphicsModule as SparkCatGraphics;
-                }
             }
             else
             {
@@ -80,20 +111,13 @@ namespace SparkCat
             
             if(SparkJump.TryGet(self, out float jumpStrength) && jumpStrength > 0)
             {
+                states[self.playerState.playerNumber].Update();
                 states[self.playerState.playerNumber].ClassMechanicsSparkCat(jumpStrength);
                 states[self.playerState.playerNumber].DoZip();
             }
             orig(self, eu);
         }
 
-        private void PlayerAddHook(On.PlayerGraphics.orig_AddToContainer orig, PlayerGraphics self, RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContatiner)
-        {
-            if (SparkJump.TryGet(self.player, out float jumpStrength) && jumpStrength > 0)
-            {
-                states[self.player.playerState.playerNumber].graphics.AddToContainer(sLeaser, rCam, newContatiner);
-            }
-            orig(self, sLeaser, rCam, newContatiner);
-        }
 
         private void QuarterPipReductionHook(On.HUD.FoodMeter.QuarterPipShower.orig_Update orig, HUD.FoodMeter.QuarterPipShower self)
         {

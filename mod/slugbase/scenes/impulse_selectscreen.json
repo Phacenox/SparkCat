@@ -2,15 +2,15 @@
 	"id": "impulse_selectscreen",
 	"scene_folder": "scenes/impulse",
 	"images": [
-		{ "name": "Background", "pos": [492, 277], "depth": 3.7, "shader": "Basic" },
-		{ "name": "parallaxitem",    "pos": [382, 304], "depth": 2.5, "shader": "Basic" },
-		{ "name": "Neuron",    "pos": [546, 363], "depth": 2.3, "shader": "Basic" },
-		{ "name": "Slugcat",    "pos": [505, 307], "depth": 1.75, "shader": "Basic" },
-		{ "name": "Front",    "pos": [305, 155], "depth": 1.5, "shader": "Basic" }
+		{ "name": "Background", "pos": [445, 220], "depth": 3.2, "shader": "Basic" },
+		{ "name": "parallaxitem",    "pos": [372, 280], "depth": 3.0, "shader": "Basic" },
+		{ "name": "Neuron",    "pos": [556, 343], "depth": 2.6, "shader": "Basic" },
+		{ "name": "Slugcat",    "pos": [515, 260], "depth": 2.2, "shader": "Basic" },
+		{ "name": "Front",    "pos": [295, 135], "depth": 1.6, "shader": "Basic" }
 	],
-	"idle_depths": [ 2.8 ],
+	"idle_depths": [ 2.2 ],
 	"glow_pos": [688, 484],
 	"mark_pos": [689, 583],
 	"select_menu_pos": [0, 0],
-	"slugcat_depth": 2.8
+	"slugcat_depth": 2.2
 }
