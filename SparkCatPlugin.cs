@@ -27,9 +27,9 @@ namespace SparkCat
         public const string PLUGIN_NAME = "Impulse";
         public const string PLUGIN_VERSION = "0.0.1";
 
-        static readonly PlayerFeature<float> SparkJump = PlayerFloat("spark_jump");
+        public static readonly PlayerFeature<float> SparkJump = PlayerFloat("spark_jump");
 
-        Dictionary<int, SparkCatState> states;
+        public static Dictionary<int, SparkCatState> states;
 
         public void OnEnable()
         {
@@ -43,6 +43,11 @@ namespace SparkCat
 
             On.Player.GrabUpdate += PlayerGrabHook;
             On.Creature.Violence += CreatureViolenceHook;
+
+            //Crafting
+            On.Player.CraftingResults += Crafting.CraftingResultHook;
+            On.Player.GraspsCanBeCrafted += Crafting.CanBeCraftedHook;
+            On.Player.SpitUpCraftedObject += Crafting.SpitUpCraftedHook;
 
             Sounds.Initialize();
         }

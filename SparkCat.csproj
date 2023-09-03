@@ -68,6 +68,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Crafting.cs" />
     <Compile Include="ObjectTeleports.cs" />
     <Compile Include="Sounds.cs" />
     <Compile Include="SparkCatGraphics.cs" />
