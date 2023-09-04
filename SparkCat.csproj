@@ -68,6 +68,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Chargeables.cs" />
     <Compile Include="Crafting.cs" />
     <Compile Include="ObjectTeleports.cs" />
     <Compile Include="Sounds.cs" />

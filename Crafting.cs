@@ -28,12 +28,12 @@ namespace SparkCat
                 {
                     if (self.grasps[0].grabbed is Spear s && !s.abstractSpear.electric && self.grasps[1].grabbed is ElectricRubbish.ElectricRubbish er && er.rubbishAbstract.electricCharge > 0)
                     {
-                        Plugin.states[p.playerState.playerNumber].tryInteractHold = -1;
+                        Plugin.states[p.playerState.playerNumber].chargeablesState.tryInteractHold = -1;
                         return AbstractPhysicalObject.AbstractObjectType.Spear;
                     }
                     if (self.grasps[1].grabbed is Spear s2 && !s2.abstractSpear.electric && self.grasps[0].grabbed is ElectricRubbish.ElectricRubbish er2 && er2.rubbishAbstract.electricCharge > 0)
                     {
-                        Plugin.states[p.playerState.playerNumber].tryInteractHold = -1;
+                        Plugin.states[p.playerState.playerNumber].chargeablesState.tryInteractHold = -1;
                         return AbstractPhysicalObject.AbstractObjectType.Spear;
                     }
                 }
@@ -43,7 +43,6 @@ namespace SparkCat
 
         public static void SpitUpCraftedHook(On.Player.orig_SpitUpCraftedObject orig, Player self)
         {
-
             if (self is Player p && Plugin.SparkJump.TryGet(p, out float jumpStrength) && jumpStrength > 0)
             {
                 self.room.PlaySound(Sounds.NoDischarge, self.mainBodyChunk.pos, 0.2f + UnityEngine.Random.value * 0.1f, 0.7f + UnityEngine.Random.value * 0.4f);

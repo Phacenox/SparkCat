@@ -19,13 +19,14 @@ using IL.MoreSlugcats;
 namespace SparkCat
 {
     [BepInDependency("slime-cubed.slugbase", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("phace.electricrubbish", BepInDependency.DependencyFlags.HardDependency)]
 
     [BepInPlugin(PLUGIN_GUID, PLUGIN_NAME, PLUGIN_VERSION)]
     public class Plugin: BaseUnityPlugin
     {
         public const string PLUGIN_GUID = "phace.sparkcat";
         public const string PLUGIN_NAME = "Impulse";
-        public const string PLUGIN_VERSION = "0.1.1";
+        public const string PLUGIN_VERSION = "0.2.0";
 
         public static readonly PlayerFeature<float> SparkJump = PlayerFloat("spark_jump");
 
@@ -68,7 +69,7 @@ namespace SparkCat
         {
             if (SparkJump.TryGet(self, out float jumpStrength) && jumpStrength > 0)
             {
-                states[self.playerState.playerNumber].GrabHook(orig, self, eu);
+                states[self.playerState.playerNumber].chargeablesState.GrabHook(orig, self, eu);
             }
             else
             {
@@ -112,7 +113,7 @@ namespace SparkCat
             
             if(SparkJump.TryGet(self, out float jumpStrength) && jumpStrength > 0)
             {
-                states[self.playerState.playerNumber].Update();
+                states[self.playerState.playerNumber].chargeablesState.Update();
                 states[self.playerState.playerNumber].ClassMechanicsSparkCat(jumpStrength);
                 states[self.playerState.playerNumber].DoZip();
             }

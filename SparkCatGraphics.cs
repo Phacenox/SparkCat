@@ -154,7 +154,7 @@ namespace SparkCat
         int curl_side = -1;
         public override void Update()
         {
-            float stiffness = 0.35f * state.zipCharges / 2;
+            float stiffness = 0.35f * state.zipChargesReady / 2;
             float[] desired_tail_angles_deg = new float[4]
             {
                 25f, 20f, 15f, 10f
@@ -200,12 +200,12 @@ namespace SparkCat
             base.DrawSprites(sLeaser, rCam, timeStacker, camPos);
             sLeaser.sprites[1].scaleX *= 0.9f;
 
-            bodyMods.DrawSprites(sLeaser, timeStacker, camPos, state.zipCharges);
+            bodyMods.DrawSprites(sLeaser, timeStacker, camPos, state.zipChargesReady);
 
             DrawLight(baseElectricColor);
 
-            sLeaser.sprites[0].color = Color.Lerp(new Color(0.01f, 0.01f, 0.01f), backColor.Color, (float)state.stored_charges / SparkCatState.max_stored_charges);
-            sLeaser.sprites[9].color = Color.Lerp(new Color(0.01f, 0.01f, 0.01f), eyeColor.Color, (float)state.stored_charges / SparkCatState.max_stored_charges * 0.7f + 0.3f);
+            sLeaser.sprites[0].color = Color.Lerp(new Color(0.01f, 0.01f, 0.01f), backColor.Color, (float)state.zipChargesStored / SparkCatState.maxZipChargesStored);
+            sLeaser.sprites[9].color = Color.Lerp(new Color(0.01f, 0.01f, 0.01f), eyeColor.Color, (float)state.zipChargesStored / SparkCatState.maxZipChargesStored * 0.7f + 0.3f);
         }
 
         public void DrawLight(Color default_eye_color)
@@ -221,7 +221,7 @@ namespace SparkCat
             LightCounter += UnityEngine.Random.Range(0.01f, 0.1f);
             if (myLight != null && state.player.room != null)
             {
-                float charge_scaling = ((float)state.zipCharges / 2 + (float)state.stored_charges / SparkCatState.max_stored_charges) / 2;
+                float charge_scaling = ((float)state.zipChargesReady / 2 + (float)state.zipChargesStored / SparkCatState.maxZipChargesStored) / 2;
 
                 myLight.HardSetPos(state.player.bodyChunks[0].pos);
                 myLight.HardSetRad(12 + num * 7 + 22 * charge_scaling);

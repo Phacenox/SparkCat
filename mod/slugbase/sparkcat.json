@@ -32,6 +32,8 @@
 		}
 	},
 	"food_min": 5,
-	"food_max": 8
+	"food_max": 8,
+	"timeline_after": "Spearmaster",
+	"timeline_before": "Artificer"
   }
 }
