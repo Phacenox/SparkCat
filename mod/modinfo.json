@@ -3,8 +3,8 @@
 	"name": "Impulse",
 	"version": "0.3.0",
 	"authors": "Phace",
-	"description": ""
-    "tags": ["Items", "Game Mechanics"],
+	"description": "Adds a new playable slugcat: The Impulse."
+    "tags": ["Campaigns", "Custom Slugcat"],
 	"requirements": ["slime-cubed.slugbase", "phace.electricrubbish"],
 	"requirements_names": ["SlugBase", "Electric Rubbish"]
 }
