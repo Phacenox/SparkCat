@@ -22,8 +22,8 @@ namespace SparkCat
         const int input_frame_window = 5;
         public float zipLength;
 
-        public const int maxZipChargesStored = 12;
-        public int zipChargesStored = 12;
+        public const int maxZipChargesStored = 10;
+        public int zipChargesStored = 10;
         public int zipChargesReady = 2;
 
         int recharge_timer = 40;
@@ -206,22 +206,23 @@ namespace SparkCat
 
             if (zipCooldown > 0)
                 zipCooldown--;
-
-            if (zipping || player.eatMeat >= 20 || player.maulTimer >= 15 || !player.Consious || zipCooldown > 0) return;
-
+            if (releaselock > 0)
+                releaselock--;
+            if (!desires_sparkjump || zipping || player.eatMeat >= 20 || player.maulTimer >= 15 || !player.Consious || zipCooldown > 0) return;
+            releaselock = 20;
             //recharge
-            if (desires_sparkjump && !player.submerged
+            if (!player.submerged
                 && (player.canJump > 0 || player.bodyMode == BodyModeIndex.CorridorClimb)
                 && (player.bodyMode != BodyModeIndex.CorridorClimb && player.bodyMode != BodyModeIndex.ClimbingOnBeam && player.input[0].y < 0
                     || (player.bodyMode == BodyModeIndex.Crawl || player.bodyMode == BodyModeIndex.CorridorClimb || player.bodyMode == BodyModeIndex.ClimbingOnBeam) && player.input[0].x == 0 && player.input[0].y == 0))
             {
                 zipCooldown = 5;
-                if (player.playerState.foodInStomach > 0 && rechargeZipStorage(6) > 0)
+                if (player.playerState.foodInStomach > 0 && rechargeZipStorage(ChargeablesState.foodvalue) > 0)
                     player.SubtractFood(1);
                 else
                     DoFailureEffect();
             }//zip
-            else if (desires_sparkjump)
+            else
             {
                 zipCooldown = 5;
                 if (zipChargesReady > 0)
@@ -230,6 +231,32 @@ namespace SparkCat
                     DoFailureEffect();
             }
         }
+        int releaselock = 0;
+        int?[] wantsToRelease = new int?[input_frame_window];
+        public void ReleaseObjectHook(On.Player.orig_ReleaseObject orig, Player self, int grasp, bool eu)
+        {
+            wantsToRelease[0] = grasp;
+        }
+        public void Update()
+        {
+            for(int i = 1; i < wantsToRelease.Length; i++)
+            {
+                wantsToRelease[i] = wantsToRelease[i - 1];
+            }
+            wantsToRelease[0] = null;
+            if (wantsToRelease[wantsToRelease.Length - 1] != null && releaselock == 0)
+            {
+                int grasp = wantsToRelease[wantsToRelease.Length - 1] ?? -1;
+                player.room.PlaySound((player.grasps[grasp].grabbed is Creature) ? SoundID.Slugcat_Lay_Down_Creature : SoundID.Slugcat_Lay_Down_Object, player.grasps[grasp].grabbedChunk, false, 1f, 1f);
+                player.room.socialEventRecognizer.CreaturePutItemOnGround(player.grasps[grasp].grabbed, player);
+                if (player.grasps[grasp].grabbed is PlayerCarryableItem)
+                {
+                    (player.grasps[grasp].grabbed as PlayerCarryableItem).Forbid();
+                }
+                player.ReleaseGrasp(grasp);
+            }
+        }
+
         public void DoFailureEffect()
         {
 

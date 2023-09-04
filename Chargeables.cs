@@ -52,7 +52,7 @@ namespace SparkCat
                 tryInteractHold++;
             }
         }
-        const int foodvalue = 6;
+        public const int foodvalue = 5;
         public void Update()
         {
             chargeHeldItem--;

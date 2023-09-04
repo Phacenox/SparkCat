@@ -20,12 +20,12 @@
                 {
                     if (self.grasps[0].grabbed is Spear s && !s.abstractSpear.electric && self.grasps[1].grabbed is ElectricRubbish.ElectricRubbish er && er.rubbishAbstract.electricCharge > 0)
                     {
-                        Plugin.states[p.playerState.playerNumber].chargeablesState.tryInteractHold = -1;
+                        Plugin.states[p].chargeablesState.tryInteractHold = -1;
                         return AbstractPhysicalObject.AbstractObjectType.Spear;
                     }
                     if (self.grasps[1].grabbed is Spear s2 && !s2.abstractSpear.electric && self.grasps[0].grabbed is ElectricRubbish.ElectricRubbish er2 && er2.rubbishAbstract.electricCharge > 0)
                     {
-                        Plugin.states[p.playerState.playerNumber].chargeablesState.tryInteractHold = -1;
+                        Plugin.states[p].chargeablesState.tryInteractHold = -1;
                         return AbstractPhysicalObject.AbstractObjectType.Spear;
                     }
                 }

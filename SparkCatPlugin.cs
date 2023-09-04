@@ -5,6 +5,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Security;
 using System.Security.Permissions;
+using System;
 
 [module: UnverifiableCode]
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -21,20 +22,21 @@ namespace SparkCat
     {
         public const string PLUGIN_GUID = "phace.impulse";
         public const string PLUGIN_NAME = "Impulse";
-        public const string PLUGIN_VERSION = "0.2.2";
+        public const string PLUGIN_VERSION = "0.3.0";
 
         public static readonly PlayerFeature<float> SparkJump = PlayerFloat("spark_jump");
 
-        public static Dictionary<int, SparkCatState> states;
+        public static Dictionary<Player, SparkCatState> states;
 
         public void OnEnable()
         {
-            states = new Dictionary<int, SparkCatState>();
+            states = new Dictionary<Player, SparkCatState>();
 
             On.Player.ctor += PlayerInitHook;
             On.Player.Update += UpdateHook;
             On.Player.Destroy += DestroyHook;
             On.Player.InitiateGraphicsModule += InitGraphicsTypeHook;
+            On.Player.ReleaseObject += ReleaseObjectHook;
 
             On.Player.GrabUpdate += PlayerGrabHook;
             On.Creature.Violence += CreatureViolenceHook;
@@ -47,6 +49,18 @@ namespace SparkCat
             On.StoryGameSession.ctor += setCampaignHook;
 
             Sounds.Initialize();
+        }
+
+        private void ReleaseObjectHook(On.Player.orig_ReleaseObject orig, Player self, int grasp, bool eu)
+        {
+            if (SparkJump.TryGet(self, out float jumpStrength) && jumpStrength > 0)
+            {
+                states[self].ReleaseObjectHook(orig, self, grasp, eu);
+            }
+            else
+            {
+                orig(self, grasp, eu);
+            }
         }
 
         private void setCampaignHook(On.StoryGameSession.orig_ctor orig, StoryGameSession self, SlugcatStats.Name saveStateNumber, RainWorldGame game)
@@ -63,7 +77,7 @@ namespace SparkCat
             {
                 if(type == Creature.DamageType.Electric && !(source.owner is ElectricRubbish.ElectricRubbish))
                 {
-                    states[p.playerState.playerNumber].rechargeZipStorage(4);
+                    states[p].rechargeZipStorage(4);
                     damage /= 2;
                 }
             }
@@ -74,7 +88,7 @@ namespace SparkCat
         {
             if (SparkJump.TryGet(self, out float jumpStrength) && jumpStrength > 0)
             {
-                states[self.playerState.playerNumber].chargeablesState.GrabHook(orig, self, eu);
+                states[self].chargeablesState.GrabHook(orig, self, eu);
             }
             else
             {
@@ -87,7 +101,7 @@ namespace SparkCat
             orig(self, abstractCreature, world);
             if (SparkJump.TryGet(self, out float jumpStrength) && jumpStrength > 0)
             {
-                states[self.playerState.playerNumber] = new SparkCatState(self);
+                states[self] = new SparkCatState(self);
             }
         }
 
@@ -96,7 +110,7 @@ namespace SparkCat
             if(self.SlugCatClass.value == "sparkcat")
             {
                 if (self.graphicsModule == null)
-                    self.graphicsModule = new SparkCatGraphics(self, states[self.playerState.playerNumber]);
+                    self.graphicsModule = new SparkCatGraphics(self, states[self]);
             }
             else
             {
@@ -107,8 +121,8 @@ namespace SparkCat
         private void DestroyHook(On.Player.orig_Destroy orig, Player self)
         {
             
-            if (states.ContainsKey(self.playerState.playerNumber))
-                states.Remove(self.playerState.playerNumber);
+            if (states.ContainsKey(self))
+                states.Remove(self);
             
             orig(self);
         }
@@ -118,9 +132,10 @@ namespace SparkCat
             
             if(SparkJump.TryGet(self, out float jumpStrength) && jumpStrength > 0)
             {
-                states[self.playerState.playerNumber].chargeablesState.Update();
-                states[self.playerState.playerNumber].ClassMechanicsSparkCat(jumpStrength);
-                states[self.playerState.playerNumber].DoZip();
+                states[self].chargeablesState.Update();
+                states[self].ClassMechanicsSparkCat(jumpStrength);
+                states[self].Update();
+                states[self].DoZip();
             }
             orig(self, eu);
         }

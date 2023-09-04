@@ -1,11 +1,10 @@
 {
 	"id": "phace.impulse",
 	"name": "Impulse",
-	"version": "0.2.2",
+	"version": "0.3.0",
 	"authors": "Phace",
 	"description": ""
     "tags": ["Items", "Game Mechanics"],
 	"requirements": ["slime-cubed.slugbase", "phace.electricrubbish"],
-	"requirements_names": ["SlugBase", "Electric Rubbish"],
-    "checksum_override_version": true
+	"requirements_names": ["SlugBase", "Electric Rubbish"]
 }
