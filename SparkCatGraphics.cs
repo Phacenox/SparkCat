@@ -1,14 +1,6 @@
-﻿using MoreSlugcats;
-using RWCustom;
+﻿using RWCustom;
 using SlugBase.DataTypes;
-using SlugBase.Features;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
-using static PlayerGraphics;
 
 namespace SparkCat
 {

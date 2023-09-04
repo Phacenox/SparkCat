@@ -1,15 +1,10 @@
-﻿
-using BepInEx;
+﻿using BepInEx;
 using SlugBase.Features;
 using static SlugBase.Features.FeatureTypes;
 using UnityEngine;
-using System;
 using System.Collections.Generic;
-using IL.JollyCoop.JollyMenu;
 using System.Security;
 using System.Security.Permissions;
-using static Unity.IO.LowLevel.Unsafe.AsyncReadManagerMetrics;
-using IL.MoreSlugcats;
 
 [module: UnverifiableCode]
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -24,7 +19,7 @@ namespace SparkCat
     [BepInPlugin(PLUGIN_GUID, PLUGIN_NAME, PLUGIN_VERSION)]
     public class Plugin: BaseUnityPlugin
     {
-        public const string PLUGIN_GUID = "phace.sparkcat";
+        public const string PLUGIN_GUID = "phace.impulse";
         public const string PLUGIN_NAME = "Impulse";
         public const string PLUGIN_VERSION = "0.2.2";
 
