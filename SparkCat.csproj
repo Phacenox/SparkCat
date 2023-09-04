@@ -37,6 +37,7 @@
     </Reference>
     <Reference Include="Electric Rubbish">
       <HintPath>..\ElectricRubbish\mod\plugins\Electric Rubbish.dll</HintPath>
+      <Private>False</Private>
     </Reference>
     <Reference Include="HOOKS-Assembly-CSharp">
       <HintPath>..\References\HOOKS-Assembly-CSharp.dll</HintPath>

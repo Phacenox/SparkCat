@@ -57,36 +57,6 @@ namespace SparkCat
                 tryInteractHold++;
             }
         }
-        int ChargeOf(PhysicalObject w)
-        {
-            if (w is ElectricRubbish.ElectricRubbish er)
-                return er.rubbishAbstract.electricCharge;
-            if (w is ElectricSpear es)
-                return es.abstractSpear.electricCharge;
-            if (w is Rock)
-                return 0;
-            return 0;
-        }
-        void SetCharge(PhysicalObject w, int charge)
-        {
-            if (w is ElectricRubbish.ElectricRubbish er)
-                er.rubbishAbstract.electricCharge = charge;
-            if (w is ElectricSpear es)
-                es.abstractSpear.electricCharge = charge == 1 ? 3 : 0;
-            if (w is Rock && charge == 1)
-            {
-                var abst = w.abstractPhysicalObject;
-                state.player.ReleaseGrasp(chargeGrasp);
-                w.RemoveFromRoom();
-                state.player.room.abstractRoom.RemoveEntity(abst);
-                ElectricRubbish.ElectricRubbishAbstract era = new ElectricRubbish.ElectricRubbishAbstract(state.player.room.world, state.player.coord, state.player.room.game.GetNewID(), 1);
-                state.player.room.abstractRoom.AddEntity(era);
-                era.RealizeInRoom();
-                if(state.player.FreeHand() != -1)
-                    state.player.SlugcatGrab(era.realizedObject, state.player.FreeHand());
-            }
-        }
-
         const int foodvalue = 6;
         public void Update()
         {
@@ -131,6 +101,36 @@ namespace SparkCat
                 }
                 //the eatExternalFoodSourceCounter animation ends with a food increase. counteract this.
                 state.player.playerState.foodInStomach--;
+            }
+        }
+
+        int ChargeOf(PhysicalObject w)
+        {
+            if (w is ElectricRubbish.ElectricRubbish er)
+                return er.rubbishAbstract.electricCharge;
+            if (w is ElectricSpear es)
+                return es.abstractSpear.electricCharge;
+            if (w is Rock)
+                return 0;
+            return 0;
+        }
+        void SetCharge(PhysicalObject w, int charge)
+        {
+            if (w is ElectricRubbish.ElectricRubbish er)
+                er.rubbishAbstract.electricCharge = charge;
+            else if (w is ElectricSpear es)
+                es.abstractSpear.electricCharge = charge == 1 ? 3 : 0;
+            else if (w is Rock && charge == 1)
+            {
+                var abst = w.abstractPhysicalObject;
+                state.player.ReleaseGrasp(chargeGrasp);
+                w.RemoveFromRoom();
+                state.player.room.abstractRoom.RemoveEntity(abst);
+                ElectricRubbish.ElectricRubbishAbstract era = new ElectricRubbish.ElectricRubbishAbstract(state.player.room.world, state.player.coord, state.player.room.game.GetNewID(), 1);
+                state.player.room.abstractRoom.AddEntity(era);
+                era.RealizeInRoom();
+                if(state.player.FreeHand() != -1)
+                    state.player.SlugcatGrab(era.realizedObject, state.player.FreeHand());
             }
         }
     }

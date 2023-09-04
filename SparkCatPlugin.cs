@@ -26,7 +26,7 @@ namespace SparkCat
     {
         public const string PLUGIN_GUID = "phace.sparkcat";
         public const string PLUGIN_NAME = "Impulse";
-        public const string PLUGIN_VERSION = "0.2.0";
+        public const string PLUGIN_VERSION = "0.2.2";
 
         public static readonly PlayerFeature<float> SparkJump = PlayerFloat("spark_jump");
 
@@ -49,7 +49,17 @@ namespace SparkCat
             On.Player.GraspsCanBeCrafted += Crafting.CanBeCraftedHook;
             On.Player.SpitUpCraftedObject += Crafting.SpitUpCraftedHook;
 
+            On.StoryGameSession.ctor += setCampaignHook;
+
             Sounds.Initialize();
+        }
+
+        private void setCampaignHook(On.StoryGameSession.orig_ctor orig, StoryGameSession self, SlugcatStats.Name saveStateNumber, RainWorldGame game)
+        {
+            /* TODO: this is default, add to mod options.
+            if (saveStateNumber.value != "sparkcat")
+                ElectricRubbish.ElectricRubbishOptions.replaceRateScalar = 0;*/
+            orig(self, saveStateNumber, game);
         }
 
         private void CreatureViolenceHook(On.Creature.orig_Violence orig, Creature self, BodyChunk source, Vector2? directionAndMomentum, BodyChunk hitChunk, PhysicalObject.Appendage.Pos hitAppendage, Creature.DamageType type, float damage, float stunBonus)

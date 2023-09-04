@@ -188,7 +188,7 @@ namespace SparkCat
             bool desires_sparkjump = player.input[0].jmp && player.input[0].pckp;
             if (desires_sparkjump)
             {
-                for (int i = 1; i < Math.Min(player.input.Length - 1, input_frame_window - 1); i++)
+                for (int i = 1; i < Math.Min(player.input.Length, input_frame_window); i++)
                 {
                     if (!player.input[i].jmp && !player.input[i].pckp)
                         break;

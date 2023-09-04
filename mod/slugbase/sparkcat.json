@@ -1,7 +1,7 @@
 {
   "id": "sparkcat",
   "name": "The Impulse",
-  "description": "Charged with electricity; <LINE> you feel most at home deep inside an iterator's can.",
+  "description": "Able to teleport short distances by expending bursts of energy; <LINE> your electricity-infused body invites you to venture to where the walls glow...",
   "features": {
     "color": "5e5efe",
     "custom_colors": [
@@ -16,7 +16,7 @@
     ],
 	"select_menu_scene": "impulse_selectscreen",
 	"sleep_scene": "impulse_sleepscreen",
-    "start_room": "SS_A04",
+    "start_room": ["SS_S05", "SS_A04"],
 	"world_state": ["Spear", "Red"],
 	"can_maul": true,
     "spark_jump": 140.0,
