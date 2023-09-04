@@ -25,7 +25,7 @@ namespace SparkCat
     {
         public const string PLUGIN_GUID = "phace.sparkcat";
         public const string PLUGIN_NAME = "Impulse";
-        public const string PLUGIN_VERSION = "0.1.0";
+        public const string PLUGIN_VERSION = "0.1.1";
 
         public static readonly PlayerFeature<float> SparkJump = PlayerFloat("spark_jump");
 

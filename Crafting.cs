@@ -15,7 +15,7 @@ namespace SparkCat
         {
             if (self is Player p && Plugin.SparkJump.TryGet(p, out float jumpStrength) && jumpStrength > 0)
             {
-                return self.input[0].y == 1 && self.CraftingResults() == AbstractPhysicalObject.AbstractObjectType.Spear || self.CraftingResults() != null;
+                return self.input[0].y == 1 && self.CraftingResults() == AbstractPhysicalObject.AbstractObjectType.Spear;
             }
             return orig(self);
         }
@@ -51,7 +51,7 @@ namespace SparkCat
                 if (self.grasps[0] == null || self.grasps[1] == null)
                     return;
                 var phys1 = self.grasps[0].grabbed.abstractPhysicalObject;
-                var phys2 = self.grasps[0].grabbed.abstractPhysicalObject;
+                var phys2 = self.grasps[1].grabbed.abstractPhysicalObject;
                 self.ReleaseGrasp(0);
                 self.ReleaseGrasp(1);
                 phys1.realizedObject.RemoveFromRoom();

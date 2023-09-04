@@ -1,10 +1,11 @@
 {
 	"id": "phace.sparkcat",
 	"name": "Impulse",
-	"version": "0.0.1",
+	"version": "0.1.1",
 	"authors": "Phace",
 	"description": ""
     "tags": ["Items", "Game Mechanics"],
 	"requirements": ["slime-cubed.slugbase"],
-	"requirements_names": ["SlugBase"]
+	"requirements_names": ["SlugBase"],
+    "checksum_override_version": true
 }
