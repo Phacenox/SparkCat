@@ -38,6 +38,8 @@ namespace SparkCat
                         if (self.grasps[i] != null && (self.grasps[i].grabbed is ElectricRubbish.ElectricRubbish || self.grasps[i].grabbed is ElectricSpear || self.grasps[i].grabbed is Rock))
                         {
                             chargeTarget = self.grasps[i].grabbed;
+                            if (i == 0 && chargeTarget is ElectricSpear es && es.abstractSpear.electricCharge > 0 && self.grasps[1] != null && self.grasps[1].grabbed is Rock)
+                                chargeTarget = self.grasps[1].grabbed;
                             self.eatExternalFoodSourceCounter = 4;
                             self.handOnExternalFoodSource = chargeTarget.bodyChunks[0].pos;
                             chargeHeldItem = 4;

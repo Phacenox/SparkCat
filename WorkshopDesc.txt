@@ -5,7 +5,8 @@
   [*][b]A Teleporting Dash: [/b]
 [list]
 	[*]Press jump and grab at the same time to perform a near instantaneous zip through the air.
-	[*]Zips can be recharged at a cost of 6 to one food pip, by holding no direction in certain states (eg. crawling, pole climbing).
+	[*]Impulse can store enough energy in its tail for two quick zips, but can store up to 10 more in its body.
+	[*]Zip charges can be regained at a cost of 6 to one food pip, by trying to zip in place while in a crawling state.
 [/list]
   [*][b]Electric Crafting Recipies: [/b]
 [list]
@@ -17,4 +18,5 @@
 
 [h3]Notes[/h3]
 This mod is in early development.
+Note that this mod limits Electric Rubbish spawns to Impulse's campaign (spearmaster's worldstate) by default.
 I intend to add a custom region and campaign in the future, but no promises.
