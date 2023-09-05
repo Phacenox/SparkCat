@@ -66,7 +66,8 @@ namespace SparkCat
             if (player.wantToJump > 0) player.wantToJump = 0;
             zipChargesReady--;
             zipStartPos = player.firstChunk.pos;
-            zipEndPos = zipStartPos + zipInputDirection.ToVector2().normalized * zipLength;
+            float zipDiagScalar = (Mathf.Abs(zipInputDirection.x) + Mathf.Abs(zipInputDirection.y)) >= 2 ? 0.8f : 1;
+            zipEndPos = zipStartPos + zipInputDirection.ToVector2().normalized * zipLength * zipDiagScalar;
 
             IntVector2 tilestart = player.room.GetTilePosition(player.firstChunk.pos);
             IntVector2 tileend = player.room.GetTilePosition(zipEndPos);
@@ -213,7 +214,7 @@ namespace SparkCat
             //recharge
             if (!player.submerged
                 && (player.canJump > 0 || player.bodyMode == BodyModeIndex.CorridorClimb)
-                && (player.bodyMode != BodyModeIndex.CorridorClimb && player.bodyMode != BodyModeIndex.ClimbingOnBeam && player.input[0].y < 0
+                && (player.input[0].y < 0 && player.input[0].x == 0
                     || (player.bodyMode == BodyModeIndex.Crawl || player.bodyMode == BodyModeIndex.CorridorClimb || player.bodyMode == BodyModeIndex.ClimbingOnBeam) && player.input[0].x == 0 && player.input[0].y == 0))
             {
                 zipCooldown = 5;
