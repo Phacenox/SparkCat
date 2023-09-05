@@ -6,7 +6,7 @@
 [list]
 	[*]Press jump and grab at the same time to perform a near instantaneous zip through the air.
 	[*]Impulse can store enough energy in its tail for two quick zips, but can store up to 10 more in its body.
-	[*]Zip charges can be regained at a cost of 6 to one food pip, by trying to zip in place while in a crawling state.
+	[*]6 Zip charges can be regained at the cost of one food pip by trying to zip downwards when grounded.
 [/list]
   [*][b]Electric Crafting Recipies: [/b]
 [list]
@@ -17,6 +17,6 @@
 [/list]
 
 [h3]Notes[/h3]
-This mod is in early development.
+This mod is still in development and has no custom worldstate, iterator dialogue, or cutscenes.
 Note that this mod limits Electric Rubbish spawns to Impulse's campaign (spearmaster's worldstate) by default.
 I intend to add a custom region and campaign in the future, but no promises.

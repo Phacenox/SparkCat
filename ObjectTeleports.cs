@@ -6,14 +6,24 @@ namespace SparkCat
     {
         public static void TrySmoothTeleportObject(PhysicalObject item, Vector2 amount)
         {
+            if(item == null)
+            {
+                Debug.Log("Tried to teleport a null object!");
+                return;
+            }
             foreach(var i in item.bodyChunks)
             {
                 i.pos += amount;
                 i.lastPos += amount;
                 i.lastLastPos += amount;
             }
-            if(item is Player p)
+            if (item is Player p)
             {
+                if (p.graphicsModule == null)
+                {
+                    Debug.Log("Tried to teleport a null playergraphics!" + p.SlugCatClass.value);
+                    return;
+                }
                 var g = p.graphicsModule as PlayerGraphics;
                 foreach (var i in g.hands)
                 {

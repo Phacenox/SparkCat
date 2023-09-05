@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Security;
 using System.Security.Permissions;
 using System;
+using MoreSlugcats;
 
 [module: UnverifiableCode]
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -14,6 +15,7 @@ using System;
 
 namespace SparkCat
 {
+
     [BepInDependency("slime-cubed.slugbase", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("phace.electricrubbish", BepInDependency.DependencyFlags.HardDependency)]
 
@@ -22,7 +24,8 @@ namespace SparkCat
     {
         public const string PLUGIN_GUID = "phace.impulse";
         public const string PLUGIN_NAME = "Impulse";
-        public const string PLUGIN_VERSION = "0.3.4";
+        public const string PLUGIN_VERSION = "0.4.0";
+        public const string SLUGCAT_NAME = "sparkcat";
 
         public static readonly PlayerFeature<float> SparkJump = PlayerFloat("spark_jump");
 
@@ -52,8 +55,15 @@ namespace SparkCat
 
             On.StoryGameSession.ctor += setCampaignHook;
 
-            Sounds.Initialize();
+            On.SSOracleBehavior.PebblesConversation.AddEvents += Oracle.PebblesConversationAddEventsHook;
+            On.SSOracleBehavior.SeePlayer += Oracle.OracleSeePlayerHook;
+            On.SSOracleBehavior.SSSleepoverBehavior.ctor += Oracle.SSSleepoverBehaviorctorHook;
+
+            On.SSOracleBehavior.Update += Oracle.SSUpdateHook;
+
+            Enums.Initialize();
         }
+
 
         private void InitHook(On.RainWorld.orig_OnModsInit orig, RainWorld self)
         {
@@ -76,7 +86,7 @@ namespace SparkCat
 
         private void setCampaignHook(On.StoryGameSession.orig_ctor orig, StoryGameSession self, SlugcatStats.Name saveStateNumber, RainWorldGame game)
         {
-            if (SparkCatOptions.ConstrainElectricRubbish == SparkCatOptions.CONSTRAIN.Disable || (SparkCatOptions.ConstrainElectricRubbish == SparkCatOptions.CONSTRAIN.ImpulseCampaign && saveStateNumber.value != "sparkcat"))
+            if (SparkCatOptions.ConstrainElectricRubbish == SparkCatOptions.CONSTRAIN.Disable || (SparkCatOptions.ConstrainElectricRubbish == SparkCatOptions.CONSTRAIN.ImpulseCampaign && saveStateNumber.value != SLUGCAT_NAME))
                 ElectricRubbish.ElectricRubbishOptions.replaceRateScalar = 0;
             else
                 ElectricRubbish.ElectricRubbishOptions.replaceRateScalar = 1;
@@ -119,7 +129,7 @@ namespace SparkCat
 
         private void InitGraphicsTypeHook(On.Player.orig_InitiateGraphicsModule orig, Player self)
         {
-            if(self.SlugCatClass.value == "sparkcat")
+            if(self.SlugCatClass.value == SLUGCAT_NAME)
             {
                 if (self.graphicsModule == null)
                     self.graphicsModule = new SparkCatGraphics(self, states[self]);
@@ -141,8 +151,7 @@ namespace SparkCat
 
         public void UpdateHook(On.Player.orig_Update orig, Player self, bool eu)
         {
-            
-            if(SparkJump.TryGet(self, out float jumpStrength) && jumpStrength > 0)
+            if (SparkJump.TryGet(self, out float jumpStrength) && jumpStrength > 0)
             {
                 states[self].chargeablesState.Update();
                 states[self].ClassMechanicsSparkCat(jumpStrength);

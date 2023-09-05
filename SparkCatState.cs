@@ -59,7 +59,7 @@ namespace SparkCat
             ret += store;
 
             MakeZipEffect(player.firstChunk.pos, 3, 0.6f, player);
-            player.room.PlaySound(Sounds.Recharge, player.mainBodyChunk.pos, 0.3f + UnityEngine.Random.value * 0.1f, 0.8f + UnityEngine.Random.value * 0.5f);
+            player.room.PlaySound(Enums.Recharge, player.mainBodyChunk.pos, 0.3f + UnityEngine.Random.value * 0.1f, 0.8f + UnityEngine.Random.value * 0.5f);
             player.room.InGameNoise(new InGameNoise(player.mainBodyChunk.pos, 200f, player, 1f));
             return ret;
         }
@@ -91,7 +91,7 @@ namespace SparkCat
             zipping = true;
             MakeZipEffect(zipStartPos, 6, 1f, player);
             MakeZipEffect(zipEndPos, 3, 0.6f);
-            player.room.PlaySound(Sounds.QuickZap, zipEndPos, 0.3f + UnityEngine.Random.value * 0.1f, 0.8f + UnityEngine.Random.value * 1.7f);
+            player.room.PlaySound(Enums.QuickZap, zipEndPos, 0.3f + UnityEngine.Random.value * 0.1f, 0.8f + UnityEngine.Random.value * 1.7f);
             player.room.InGameNoise(new InGameNoise(zipEndPos, 800f, player, 1f));
         }
 
@@ -221,7 +221,7 @@ namespace SparkCat
             //recharge
             if (!player.submerged
                 && (player.canJump > 0 || player.bodyMode == BodyModeIndex.CorridorClimb)
-                && (player.input[0].y < 0 && player.input[0].x == 0
+                && ((player.input[0].y < 0 && player.input[0].x == 0 && player.bodyMode != BodyModeIndex.CorridorClimb)
                     || (player.bodyMode == BodyModeIndex.Crawl || player.bodyMode == BodyModeIndex.CorridorClimb || player.bodyMode == BodyModeIndex.ClimbingOnBeam) && player.input[0].x == 0 && player.input[0].y == 0))
             {
                 zipCooldown = 5;
@@ -268,7 +268,7 @@ namespace SparkCat
         public void DoFailureEffect()
         {
 
-            player.room.PlaySound(Sounds.NoDischarge, player.mainBodyChunk.pos, 0.2f + UnityEngine.Random.value * 0.1f, 0.7f + UnityEngine.Random.value * 0.4f);
+            player.room.PlaySound(Enums.NoDischarge, player.mainBodyChunk.pos, 0.2f + UnityEngine.Random.value * 0.1f, 0.7f + UnityEngine.Random.value * 0.4f);
             player.room.InGameNoise(new InGameNoise(player.mainBodyChunk.pos, 200f, player, 1f));
             Vector2 vector = Custom.RNV();
             player.room.AddObject(new Spark(player.firstChunk.pos + vector * UnityEngine.Random.value * 4f, vector * Mathf.Lerp(4f, 30f, UnityEngine.Random.value), Color.white * 0.8f, null, 4, 6));

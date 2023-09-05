@@ -1,11 +1,12 @@
 ﻿
 namespace SparkCat
 {
-    public static class Sounds
+    public static class Enums
     {
         public static SoundID QuickZap { get; private set; }
         public static SoundID NoDischarge { get; private set; }
         public static SoundID Recharge { get; private set; }
+        
 
         internal static void Initialize()
         {

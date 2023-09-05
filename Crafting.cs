@@ -47,7 +47,7 @@
                 }
                 ChargeablesState.SpendCharge(state, cost);
 
-                self.room.PlaySound(Sounds.NoDischarge, self.mainBodyChunk.pos, 0.2f + UnityEngine.Random.value * 0.1f, 0.7f + UnityEngine.Random.value * 0.4f);
+                self.room.PlaySound(Enums.NoDischarge, self.mainBodyChunk.pos, 0.2f + UnityEngine.Random.value * 0.1f, 0.7f + UnityEngine.Random.value * 0.4f);
                 self.room.PlaySound(SoundID.Rock_Hit_Creature, self.mainBodyChunk, false, 0.4f, 1);
                 if (self.grasps[0] == null || self.grasps[1] == null)
                     return;

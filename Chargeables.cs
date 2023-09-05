@@ -62,7 +62,8 @@ namespace SparkCat
         {
             chargevalue -= p.zipChargesReady;
             chargevalue -= p.zipChargesStored;
-            chargevalue -= p.player.FoodInStomach * foodvalue;
+            if (p.player != null)
+                chargevalue -= p.player.FoodInStomach * foodvalue;
             return chargevalue <= 0;
         }
         //assumes hasenoughfood
@@ -71,10 +72,14 @@ namespace SparkCat
             int diff = Mathf.Min(chargevalue, state.zipChargesReady);
             chargevalue -= diff;
             state.zipChargesReady -= diff;
-            while (chargevalue > state.zipChargesStored)
+            int max_iter = 2;
+            int iter = 0;
+            while (chargevalue > state.zipChargesStored && iter < max_iter)
             {
+                iter++;
                 chargevalue -= foodvalue;
-                state.player.SubtractFood(1);
+                if(state.player != null)
+                    state.player.SubtractFood(1);
                 if (chargevalue < 0)
                 {
                     state.zipChargesStored -= chargevalue;
@@ -103,6 +108,8 @@ namespace SparkCat
                         SpendCharge(state, cost);
                         SetCharge(chargeTarget, 1);
 
+                        if (state.player == null)
+                            return;
                         state.player.room.AddObject(new ZapCoil.ZapFlash(chargeTarget.firstChunk.pos, 0.5f));
                         state.player.room.PlaySound(SoundID.Zapper_Zap, chargeTarget.firstChunk.pos, .3f, 1.5f + UnityEngine.Random.value * 1.5f);
                         state.player.room.PlaySound(SoundID.Rock_Hit_Creature, chargeTarget.firstChunk, false, 0.6f, 1);

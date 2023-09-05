@@ -1,5 +1,6 @@
 ﻿using RWCustom;
 using SlugBase.DataTypes;
+using System.Linq;
 using UnityEngine;
 
 namespace SparkCat
@@ -27,7 +28,7 @@ namespace SparkCat
                 baseElectricColor = PlayerColor.GetCustomColor(this, 1);
             }
 
-            bodyMods = new BodyMods(this, original_sprite_count - 1);
+            bodyMods = new BodyMods(this, original_sprite_count);
             tail[1].rad -= 1;
             tail[2].rad += 1;
             eyeColor = new ElectricityColor(baseElectricColor, 0.3f);
@@ -36,78 +37,28 @@ namespace SparkCat
 
         float LightCounter = 0;
 
+        bool render_flag = false;
         public override void InitiateSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam)
         {
+            base.InitiateSprites(sLeaser, rCam);
+            bodyMods = new BodyMods(this, sLeaser.sprites.Length);
+            FSprite[] rx = new FSprite[sLeaser.sprites.Length + bodyMods.numberOfSprites];
+            sLeaser.sprites.CopyTo(rx, 0);
+            sLeaser.sprites = rx;
+
+            bodyMods.InitiateSprites(sLeaser);
+
             if (!owner.room.game.DEBUGMODE)
             {
-                sLeaser.sprites = new FSprite[original_sprite_count + bodyMods.numberOfSprites];
-
-                sLeaser.sprites[0] = new FSprite("BodyA");
-                sLeaser.sprites[0].anchorY = 0.7894737f;
-                if (RenderAsPup)
-                    sLeaser.sprites[0].scaleY = 0.5f;
-                sLeaser.sprites[1] = new FSprite("HipsA");
-                TriangleMesh.Triangle[] tris = new TriangleMesh.Triangle[13]
-                {
-                new TriangleMesh.Triangle(0, 1, 2), new TriangleMesh.Triangle(1, 2, 3), new TriangleMesh.Triangle(4, 5, 6),
-                new TriangleMesh.Triangle(5, 6, 7), new TriangleMesh.Triangle(8, 9, 10), new TriangleMesh.Triangle(9, 10, 11),
-                new TriangleMesh.Triangle(12, 13, 14), new TriangleMesh.Triangle(2, 3, 4), new TriangleMesh.Triangle(3, 4, 5),
-                new TriangleMesh.Triangle(6, 7, 8), new TriangleMesh.Triangle(7, 8, 9), new TriangleMesh.Triangle(10, 11, 12),
-                new TriangleMesh.Triangle(11, 12, 13)
-                };
-                TriangleMesh triangleMesh = new TriangleMesh("Futile_White", tris, customColor: false);
-                sLeaser.sprites[2] = triangleMesh;
-                sLeaser.sprites[3] = new FSprite("HeadA0");
-                sLeaser.sprites[4] = new FSprite("LegsA0");
-                sLeaser.sprites[4].anchorY = 0.25f;
-                sLeaser.sprites[5] = new FSprite("PlayerArm0");
-                sLeaser.sprites[5].anchorX = 0.9f;
-                sLeaser.sprites[5].scaleY = -1f;
-                sLeaser.sprites[6] = new FSprite("PlayerArm0");
-                sLeaser.sprites[6].anchorX = 0.9f;
-                sLeaser.sprites[7] = new FSprite("OnTopOfTerrainHand");
-                sLeaser.sprites[8] = new FSprite("OnTopOfTerrainHand");
-                sLeaser.sprites[8].scaleX = -1f;
-                sLeaser.sprites[9] = new FSprite("FaceA0");
-                sLeaser.sprites[11] = new FSprite("pixel");
-                sLeaser.sprites[11].scale = 5f;
-                sLeaser.sprites[10] = new FSprite("Futile_White");
-                sLeaser.sprites[10].shader = rCam.game.rainWorld.Shaders["FlatLight"];
-                bodyMods.InitiateSprites(sLeaser);
-                if (ModManager.MSC && gown != null)
-                {
-                    gownIndex = sLeaser.sprites.Length - 1;
-                    gown.InitiateSprite(gownIndex, sLeaser, rCam);
-                }
+                render_flag = true;
                 AddToContainer(sLeaser, rCam, null);
-            }
-            else
-            {
-                sLeaser.sprites = new FSprite[2];
-                for (int l = 0; l < 2; l++)
-                {
-                    FSprite fSprite = new FSprite("pixel");
-                    sLeaser.sprites[l] = fSprite;
-                    rCam.ReturnFContainer("Midground").AddChild(fSprite);
-                    fSprite.x = -10000f;
-                    fSprite.color = new Color(1f, 0.7f, 1f);
-                    fSprite.scale = owner.bodyChunks[l].rad * 2f;
-                    fSprite.shader = FShader.Basic;
-                }
-            }
-            //up two levels (base.base)
-            if (DEBUGLABELS != null && DEBUGLABELS.Length != 0)
-            {
-                DebugLabel[] dEBUGLABELS = DEBUGLABELS;
-                foreach (DebugLabel debugLabel in dEBUGLABELS)
-                {
-                    rCam.ReturnFContainer("HUD").AddChild(debugLabel.label);
-                }
+                render_flag = false;
             }
         }
 
         public override void AddToContainer(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, FContainer newContainer)
         {
+            if (!render_flag) return;
             sLeaser.RemoveAllSpritesFromContainer();
             if (newContainer == null)
                 newContainer = rCam.ReturnFContainer("Midground");
@@ -179,10 +130,11 @@ namespace SparkCat
                     tail[i].vel.y += stiffness * 0.25f * ((4 - i) / 3);
 
                     desired_angle = (tail[i].pos - tail[i - 1].pos).normalized;
-                    desired_angle = Custom.rotateVectorDeg(desired_angle, curl_side * desired_tail_angles_deg[i]);
+                    desired_angle = Custom.rotateVectorDeg(desired_angle, curl_side * desired_tail_angles_deg[Mathf.Min(i, 3)]);
                 }
             }
         }
+
         public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
 

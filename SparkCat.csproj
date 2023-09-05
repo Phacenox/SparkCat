@@ -72,7 +72,8 @@
     <Compile Include="Chargeables.cs" />
     <Compile Include="Crafting.cs" />
     <Compile Include="ObjectTeleports.cs" />
-    <Compile Include="Sounds.cs" />
+    <Compile Include="Oracle.cs" />
+    <Compile Include="Enums.cs" />
     <Compile Include="SparkCatGraphics.cs" />
     <Compile Include="SparkCatOptions.cs" />
     <Compile Include="SparkCatState.cs" />
