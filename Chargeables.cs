@@ -54,13 +54,41 @@ namespace SparkCat
                 tryInteractHold++;
             }
         }
-        public const int foodvalue = 5;
+        public const int foodvalue = 6;
+        public const int rubbishChargeValue = 6;
+        public const int spearChargeValue = 12;
+
+        public static bool HasEnoughCharge(SparkCatState p, int chargevalue)
+        {
+            chargevalue -= p.zipChargesReady;
+            chargevalue -= p.zipChargesStored;
+            chargevalue -= p.player.FoodInStomach * foodvalue;
+            return chargevalue <= 0;
+        }
+        //assumes hasenoughfood
+        public static void SpendCharge(SparkCatState state, int chargevalue)
+        {
+            int diff = Mathf.Min(chargevalue, state.zipChargesReady);
+            chargevalue -= diff;
+            state.zipChargesReady -= diff;
+            while (chargevalue > state.zipChargesStored)
+            {
+                chargevalue -= foodvalue;
+                state.player.SubtractFood(1);
+                if (chargevalue < 0)
+                {
+                    state.zipChargesStored -= chargevalue;
+                    chargevalue = 0;
+                }
+            }
+            state.zipChargesStored -= chargevalue;
+        }
         public void Update()
         {
             chargeHeldItem--;
             if (chargeHeldItem == 0 && chargeTarget != null)
             {
-                int cost = chargeTarget is ElectricSpear ? 12 : 6;
+                int cost = chargeTarget is ElectricSpear ? spearChargeValue : rubbishChargeValue;
                 if (chargeTarget is ElectricRubbish.ElectricRubbish && ChargeOf(chargeTarget) > 0)
                 {
                     if (state.rechargeZipStorage(cost) > 0)
@@ -70,20 +98,9 @@ namespace SparkCat
                 }
                 else if (ChargeOf(chargeTarget) == 0)
                 {
-                    if (state.zipChargesStored + state.player.FoodInStomach * foodvalue >= cost)
+                    if (HasEnoughCharge(state, cost))
                     {
-                        while (cost > state.zipChargesStored)
-                        {
-                            cost -= foodvalue;
-                            state.player.SubtractFood(1);
-                            if (cost < 0)
-                            {
-                                state.zipChargesStored -= cost;
-                                cost = 0;
-                            }
-                        }
-                        state.zipChargesStored -= cost;
-
+                        SpendCharge(state, cost);
                         SetCharge(chargeTarget, 1);
 
                         state.player.room.AddObject(new ZapCoil.ZapFlash(chargeTarget.firstChunk.pos, 0.5f));

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Noise;
 using RWCustom;
 using UnityEngine;
@@ -46,11 +47,16 @@ namespace SparkCat
 
         public int rechargeZipStorage(int max_available)
         {
-            if (max_available == 0 || maxZipChargesStored == zipChargesStored) return 0;
+            if (max_available == 0 || (maxZipChargesStored == zipChargesStored && zipChargesReady == 2)) return 0;
+            var ret = 0;
+            var diff = Mathf.Min(max_available, 2 - zipChargesReady);
+            zipChargesReady += diff;
+            max_available -= diff;
+            ret += diff;
 
-            var ret = maxZipChargesStored - zipChargesStored;
-            ret = Mathf.Min(ret, max_available);
-            zipChargesStored += ret;
+            var store = Mathf.Min(maxZipChargesStored - zipChargesStored, max_available);
+            zipChargesStored += store;
+            ret += store;
 
             MakeZipEffect(player.firstChunk.pos, 3, 0.6f, player);
             player.room.PlaySound(Sounds.Recharge, player.mainBodyChunk.pos, 0.3f + UnityEngine.Random.value * 0.1f, 0.8f + UnityEngine.Random.value * 0.5f);

@@ -37,6 +37,16 @@
         {
             if (self is Player p && Plugin.SparkJump.TryGet(p, out float jumpStrength) && jumpStrength > 0)
             {
+                var state = Plugin.states[p];
+
+                int cost = ChargeablesState.spearChargeValue - ChargeablesState.rubbishChargeValue;
+                if (!ChargeablesState.HasEnoughCharge(state, cost))
+                {
+                    state.DoFailureEffect();
+                    return;
+                }
+                ChargeablesState.SpendCharge(state, cost);
+
                 self.room.PlaySound(Sounds.NoDischarge, self.mainBodyChunk.pos, 0.2f + UnityEngine.Random.value * 0.1f, 0.7f + UnityEngine.Random.value * 0.4f);
                 self.room.PlaySound(SoundID.Rock_Hit_Creature, self.mainBodyChunk, false, 0.4f, 1);
                 if (self.grasps[0] == null || self.grasps[1] == null)
@@ -55,7 +65,6 @@
                 if (self.FreeHand() != -1)
                     self.SlugcatGrab(newSpear.realizedObject, self.FreeHand());
                 return;
-
             }
             else
             {
