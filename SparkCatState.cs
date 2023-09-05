@@ -109,18 +109,20 @@ namespace SparkCat
                 zipStartPos = player.firstChunk.pos;
                 if (zipInputDirection == new IntVector2(0,0))
                     zipEndPos = zipStartPos + Vector2.up * 3;
-                MakeZipEffect(zipStartPos, 3, 0.6f);
-                MakeZipEffect(zipEndPos, 6, 1f, player);
+
                 var distance = zipEndPos -  zipStartPos;
+                ObjectTeleports.TrySmoothTeleportObject(player, distance);
 
                 if (player.slugOnBack != null && player.slugOnBack.HasASlug)
                     ObjectTeleports.TrySmoothTeleportObject(player.slugOnBack.slugcat, distance);
                 if(player.spearOnBack != null)
                     ObjectTeleports.TrySmoothTeleportObject(player.spearOnBack.spear, distance);
-                ObjectTeleports.TrySmoothTeleportObject(player, distance);
                 foreach (var i in player.grasps)
                     if(i != null)
                         ObjectTeleports.TrySmoothTeleportObject(i.grabbed, distance);
+
+                MakeZipEffect(zipStartPos, 3, 0.6f);
+                MakeZipEffect(zipEndPos, 6, 1f, player);
 
                 var target_vel = (zipEndPos - zipStartPos).normalized * 3;
                 if (Mathf.Abs(target_vel.y) < 0.7f)
@@ -141,7 +143,6 @@ namespace SparkCat
                         player.bodyChunks[i].vel.y = Mathf.Sign(old_vel.y) * Mathf.Max(Mathf.Abs(old_vel.y), Mathf.Abs(target_vel.y));
                     else
                         player.bodyChunks[i].vel.y = target_vel.y;
-
                 }
             }
 
