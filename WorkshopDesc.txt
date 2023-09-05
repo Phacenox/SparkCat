@@ -1,0 +1,20 @@
+[h2]Able to teleport short distances by expending bursts of energy; this electric slugcat can outmaneuver almost any creature.[/h2]
+
+[h3]Features[/h3]
+[list]
+  [*][b]A Teleporting Dash: [/b]
+[list]
+	[*]Press jump and grab at the same time to perform a near instantaneous zip through the air.
+	[*]Zips can be recharged at a cost of 6 to one food pip, by holding no direction in certain states (eg. crawling, pole climbing).
+[/list]
+  [*][b]Electric Crafting Recipies: [/b]
+[list]
+	[*]Rubbish and spears found around the world can be charged, for a cost.
+	[*]Press and hold grab to charge an electric spear or piece of rubbish, or to consume its charge to replenish zips.
+	[*]Press and hold up and grab with both an electrified rubbish and a spear to craft an electric spear.
+[/list]
+[/list]
+
+[h3]Notes[/h3]
+This mod is in early development.
+I intend to add a custom region and campaign in the future, but no promises.

@@ -22,15 +22,19 @@ namespace SparkCat
     {
         public const string PLUGIN_GUID = "phace.impulse";
         public const string PLUGIN_NAME = "Impulse";
-        public const string PLUGIN_VERSION = "0.3.0";
+        public const string PLUGIN_VERSION = "0.3.1";
 
         public static readonly PlayerFeature<float> SparkJump = PlayerFloat("spark_jump");
+
+        public OptionInterface config;
 
         public static Dictionary<Player, SparkCatState> states;
 
         public void OnEnable()
         {
             states = new Dictionary<Player, SparkCatState>();
+
+            On.RainWorld.OnModsInit += InitHook;
 
             On.Player.ctor += PlayerInitHook;
             On.Player.Update += UpdateHook;
@@ -51,6 +55,13 @@ namespace SparkCat
             Sounds.Initialize();
         }
 
+        private void InitHook(On.RainWorld.orig_OnModsInit orig, RainWorld self)
+        {
+            orig(self);
+            config = new SparkCatOptions();
+            MachineConnector.SetRegisteredOI(PLUGIN_GUID, config);
+        }
+
         private void ReleaseObjectHook(On.Player.orig_ReleaseObject orig, Player self, int grasp, bool eu)
         {
             if (SparkJump.TryGet(self, out float jumpStrength) && jumpStrength > 0)
@@ -65,9 +76,10 @@ namespace SparkCat
 
         private void setCampaignHook(On.StoryGameSession.orig_ctor orig, StoryGameSession self, SlugcatStats.Name saveStateNumber, RainWorldGame game)
         {
-            /* TODO: this is default, add to mod options.
-            if (saveStateNumber.value != "sparkcat")
-                ElectricRubbish.ElectricRubbishOptions.replaceRateScalar = 0;*/
+            if (SparkCatOptions.ConstrainElectricRubbish == SparkCatOptions.CONSTRAIN.Disable || (SparkCatOptions.ConstrainElectricRubbish == SparkCatOptions.CONSTRAIN.ImpulseCampaign && saveStateNumber.value != "sparkcat"))
+                ElectricRubbish.ElectricRubbishOptions.replaceRateScalar = 0;
+            else
+                ElectricRubbish.ElectricRubbishOptions.replaceRateScalar = 1;
             orig(self, saveStateNumber, game);
         }
 

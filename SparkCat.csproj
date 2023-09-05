@@ -74,6 +74,7 @@
     <Compile Include="ObjectTeleports.cs" />
     <Compile Include="Sounds.cs" />
     <Compile Include="SparkCatGraphics.cs" />
+    <Compile Include="SparkCatOptions.cs" />
     <Compile Include="SparkCatState.cs" />
     <Compile Include="SparkCatPlugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
