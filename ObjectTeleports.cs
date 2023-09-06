@@ -8,7 +8,7 @@ namespace SparkCat
         {
             if(item == null)
             {
-                Debug.Log("Tried to teleport a null object!");
+                Debug.Log("Impulse: Tried to teleport a null object!");
                 return;
             }
             foreach(var i in item.bodyChunks)
@@ -21,7 +21,7 @@ namespace SparkCat
             {
                 if (p.graphicsModule == null)
                 {
-                    Debug.Log("Tried to teleport a null playergraphics!" + p.SlugCatClass.value);
+                    Debug.Log("Impulse: Tried to teleport a null playergraphics!" + p.SlugCatClass.value);
                     return;
                 }
                 var g = p.graphicsModule as PlayerGraphics;

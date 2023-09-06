@@ -193,7 +193,11 @@ namespace SparkCat
 
             //determine inputs with buffer
             bool desires_sparkjump = player.input[0].jmp && player.input[0].pckp;
-            if (desires_sparkjump)
+            if (Plugin.custom_input_enabled(player.playerState.playerNumber))
+            {
+                desires_sparkjump = Plugin.custom_zip_pressed(player.playerState.playerNumber);
+            }
+            else if (desires_sparkjump)
             {
                 for (int i = 1; i < Math.Min(player.input.Length, input_frame_window); i++)
                 {

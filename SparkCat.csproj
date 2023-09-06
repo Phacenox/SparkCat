@@ -43,6 +43,10 @@
       <HintPath>..\References\HOOKS-Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="ImprovedInput">
+      <HintPath>..\References\ImprovedInput.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="PUBLIC-Assembly-CSharp">
       <HintPath>..\References\PUBLIC-Assembly-CSharp.dll</HintPath>
       <Private>False</Private>

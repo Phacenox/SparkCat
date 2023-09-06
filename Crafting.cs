@@ -5,7 +5,7 @@
 
         public static bool CanBeCraftedHook(On.Player.orig_GraspsCanBeCrafted orig, Player self)
         {
-            if (self is Player p && Plugin.SparkJump.TryGet(p, out float jumpStrength) && jumpStrength > 0)
+            if (Plugin.SparkJump.TryGet(self, out float jumpStrength) && jumpStrength > 0)
             {
                 return self.input[0].y == 1 && self.CraftingResults() == AbstractPhysicalObject.AbstractObjectType.Spear;
             }
@@ -14,18 +14,18 @@
 
         public static AbstractPhysicalObject.AbstractObjectType CraftingResultHook(On.Player.orig_CraftingResults orig, Player self)
         {
-            if (self is Player p && Plugin.SparkJump.TryGet(p, out float jumpStrength) && jumpStrength > 0)
+            if (Plugin.SparkJump.TryGet(self, out float jumpStrength) && jumpStrength > 0)
             {
                 if (self.grasps[0] != null && self.grasps[1] != null)
                 {
                     if (self.grasps[0].grabbed is Spear s && !s.abstractSpear.electric && self.grasps[1].grabbed is ElectricRubbish.ElectricRubbish er && er.rubbishAbstract.electricCharge > 0)
                     {
-                        Plugin.states[p].chargeablesState.tryInteractHold = -1;
+                        Plugin.states[self].chargeablesState.tryInteractHold = -1;
                         return AbstractPhysicalObject.AbstractObjectType.Spear;
                     }
                     if (self.grasps[1].grabbed is Spear s2 && !s2.abstractSpear.electric && self.grasps[0].grabbed is ElectricRubbish.ElectricRubbish er2 && er2.rubbishAbstract.electricCharge > 0)
                     {
-                        Plugin.states[p].chargeablesState.tryInteractHold = -1;
+                        Plugin.states[self].chargeablesState.tryInteractHold = -1;
                         return AbstractPhysicalObject.AbstractObjectType.Spear;
                     }
                 }
@@ -35,9 +35,9 @@
 
         public static void SpitUpCraftedHook(On.Player.orig_SpitUpCraftedObject orig, Player self)
         {
-            if (self is Player p && Plugin.SparkJump.TryGet(p, out float jumpStrength) && jumpStrength > 0)
+            if (Plugin.SparkJump.TryGet(self, out float jumpStrength) && jumpStrength > 0)
             {
-                var state = Plugin.states[p];
+                var state = Plugin.states[self];
 
                 int cost = ChargeablesState.spearChargeValue - ChargeablesState.rubbishChargeValue;
                 if (!ChargeablesState.HasEnoughCharge(state, cost))

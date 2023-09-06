@@ -7,6 +7,9 @@ using System.Security;
 using System.Security.Permissions;
 using System;
 using MoreSlugcats;
+using SlugBase.Assets;
+using Menu;
+using ImprovedInput;
 
 [module: UnverifiableCode]
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -18,6 +21,7 @@ namespace SparkCat
 
     [BepInDependency("slime-cubed.slugbase", BepInDependency.DependencyFlags.HardDependency)]
     [BepInDependency("phace.electricrubbish", BepInDependency.DependencyFlags.HardDependency)]
+    [BepInDependency("improved-input-config", BepInDependency.DependencyFlags.SoftDependency)]
 
     [BepInPlugin(PLUGIN_GUID, PLUGIN_NAME, PLUGIN_VERSION)]
     public class Plugin: BaseUnityPlugin
@@ -32,6 +36,17 @@ namespace SparkCat
         public OptionInterface config;
 
         public static Dictionary<Player, SparkCatState> states;
+
+        public static bool _custom_input_enabled = false;
+        public static bool custom_input_enabled(int player)
+        {
+            return _custom_input_enabled && zipKeybind.CurrentBinding(player) != KeyCode.None;
+        }
+        public static PlayerKeybind zipKeybind;
+        public static bool custom_zip_pressed(int player)
+        {
+            return zipKeybind.CheckRawPressed(player);
+        }
 
         public void OnEnable()
         {
@@ -64,12 +79,24 @@ namespace SparkCat
             Enums.Initialize();
         }
 
-
         private void InitHook(On.RainWorld.orig_OnModsInit orig, RainWorld self)
         {
             orig(self);
             config = new SparkCatOptions();
             MachineConnector.SetRegisteredOI(PLUGIN_GUID, config);
+
+            var inputconfig = ModManager.ActiveMods.Find((ModManager.Mod m) =>
+            {
+                return m.id == "improved-input-config";
+            });
+            if (inputconfig != null)
+            {
+                _custom_input_enabled = true;
+                zipKeybind = PlayerKeybind.Get("impulse:zip");
+                if(zipKeybind == null)
+                    zipKeybind = PlayerKeybind.Register("impulse:zip", "The Impulse", "Zip Override", KeyCode.None, KeyCode.None);
+                Debug.Log("Impulse: custom input settings connected.");
+            }
         }
 
         private void ReleaseObjectHook(On.Player.orig_ReleaseObject orig, Player self, int grasp, bool eu)
