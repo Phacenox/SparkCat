@@ -9,7 +9,7 @@ using System;
 using MoreSlugcats;
 using SlugBase.Assets;
 using Menu;
-using ImprovedInput;
+using System.Reflection;
 
 [module: UnverifiableCode]
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -28,7 +28,7 @@ namespace SparkCat
     {
         public const string PLUGIN_GUID = "phace.impulse";
         public const string PLUGIN_NAME = "Impulse";
-        public const string PLUGIN_VERSION = "0.4.0";
+        public const string PLUGIN_VERSION = "0.4.1";
         public const string SLUGCAT_NAME = "sparkcat";
 
         public static readonly PlayerFeature<float> SparkJump = PlayerFloat("spark_jump");
@@ -40,12 +40,12 @@ namespace SparkCat
         public static bool _custom_input_enabled = false;
         public static bool custom_input_enabled(int player)
         {
-            return _custom_input_enabled && zipKeybind.CurrentBinding(player) != KeyCode.None;
+            return _custom_input_enabled && (zipKeybind.GetType().GetMethod("CurrentBinding").Invoke( zipKeybind, new object[] { player }) as KeyCode? ?? KeyCode.None) != KeyCode.None;
         }
-        public static PlayerKeybind zipKeybind;
+        public static object zipKeybind;
         public static bool custom_zip_pressed(int player)
         {
-            return zipKeybind.CheckRawPressed(player);
+            return zipKeybind.GetType().GetMethod("CheckRawPressed").Invoke(zipKeybind, new object[] { player}) as bool? ?? false;
         }
 
         public void OnEnable()
@@ -92,9 +92,11 @@ namespace SparkCat
             if (inputconfig != null)
             {
                 _custom_input_enabled = true;
-                zipKeybind = PlayerKeybind.Get("impulse:zip");
+                zipKeybind = Type.GetType("ImprovedInput.PlayerKeybind,ImprovedInput").GetMethod("Get").Invoke(null, new object[] { "impulse:zip" });
                 if(zipKeybind == null)
-                    zipKeybind = PlayerKeybind.Register("impulse:zip", "The Impulse", "Zip Override", KeyCode.None, KeyCode.None);
+                    zipKeybind = Type.GetType("ImprovedInput.PlayerKeybind,ImprovedInput").
+                        GetMethod("Register", new[] { typeof(string), typeof(string), typeof(string), typeof(KeyCode), typeof(KeyCode) }).
+                        Invoke(null, new object[] { "impulse:zip", "The Impulse", "Zip Override", KeyCode.None, KeyCode.None });
                 Debug.Log("Impulse: custom input settings connected.");
             }
         }
