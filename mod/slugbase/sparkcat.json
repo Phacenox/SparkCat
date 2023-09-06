@@ -7,11 +7,13 @@
     "custom_colors": [
       {
         "name": "Body",
-        "story": "101059"
+        "story": "101059",
+		"arena": ["393f54", "10593a", "591010", "101059"]
       },
       {
         "name": "Eyes",
-        "story": "8585ff"
+        "story": "8585ff",
+		"arena": ["8585ff", "8585ff", "8585ff", "8585ff"]
       }
     ],
 	"select_menu_scene": "impulse_selectscreen",

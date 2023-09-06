@@ -58,17 +58,24 @@ namespace SparkCat
         public const int rubbishChargeValue = 6;
         public const int spearChargeValue = 12;
 
-        public static bool HasEnoughCharge(SparkCatState p, int chargevalue)
+        public static bool HasEnoughCharge(SparkCatState state, int chargevalue)
         {
-            chargevalue -= p.zipChargesReady;
-            chargevalue -= p.zipChargesStored;
-            if (p.player != null)
-                chargevalue -= p.player.FoodInStomach * foodvalue;
+            if (state.player.room.game.IsArenaSession)
+                return state.zipChargesReady >= chargevalue;
+            chargevalue -= state.zipChargesReady;
+            chargevalue -= state.zipChargesStored;
+            if (state.player != null)
+                chargevalue -= state.player.FoodInStomach * foodvalue;
             return chargevalue <= 0;
         }
         //assumes hasenoughfood
         public static void SpendCharge(SparkCatState state, int chargevalue)
         {
+            if (state.player.room.game.IsArenaSession)
+            {
+                state.zipChargesReady -= chargevalue;
+                return;
+            }
             int diff = Mathf.Min(chargevalue, state.zipChargesReady);
             chargevalue -= diff;
             state.zipChargesReady -= diff;
@@ -94,6 +101,8 @@ namespace SparkCat
             if (chargeHeldItem == 0 && chargeTarget != null)
             {
                 int cost = chargeTarget is ElectricSpear ? spearChargeValue : rubbishChargeValue;
+                if (state.player.room.game.IsArenaSession)
+                    cost = 1;
                 if (chargeTarget is ElectricRubbish.ElectricRubbish && ChargeOf(chargeTarget) > 0)
                 {
                     if (state.rechargeZipStorage(cost) > 0)
@@ -121,7 +130,7 @@ namespace SparkCat
                         state.DoFailureEffect();
                 }
                 //the eatExternalFoodSourceCounter animation ends with a food increase. counteract this.
-                state.player.playerState.foodInStomach--;
+                state.player.eatExternalFoodSourceCounter -= 1;
             }
         }
 
