@@ -159,6 +159,7 @@ namespace SparkCat
             }
         }
 
+        bool custom_input_last = false;
         public void ClassMechanicsSparkCat(float zipLength)
         {
             this.zipLength = zipLength;
@@ -195,7 +196,8 @@ namespace SparkCat
             bool desires_sparkjump = player.input[0].jmp && player.input[0].pckp;
             if (Plugin.custom_input_enabled(player.playerState.playerNumber))
             {
-                desires_sparkjump = Plugin.custom_zip_pressed(player.playerState.playerNumber);
+                desires_sparkjump = Plugin.custom_zip_pressed(player.playerState.playerNumber) && !custom_input_last;
+                custom_input_last = Plugin.custom_zip_pressed(player.playerState.playerNumber);
             }
             else if (desires_sparkjump)
             {

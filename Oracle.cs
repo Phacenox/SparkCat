@@ -138,7 +138,6 @@ namespace SparkCat
                     return;
                 }
             }
-            orig(self);
         }
 
         internal static void SSUpdateHook(On.SSOracleBehavior.orig_Update orig, SSOracleBehavior self, bool eu)

@@ -75,6 +75,7 @@
   <ItemGroup>
     <Compile Include="Chargeables.cs" />
     <Compile Include="Crafting.cs" />
+    <Compile Include="Maul.cs" />
     <Compile Include="ObjectTeleports.cs" />
     <Compile Include="Oracle.cs" />
     <Compile Include="Enums.cs" />

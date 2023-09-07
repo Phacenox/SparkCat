@@ -33,9 +33,10 @@
 			"Neuron": 1.5
 		}
 	},
-	"food_min": 5,
-	"food_max": 8,
+	"food_min": 6,
+	"food_max": 9,
 	"timeline_before": "Spearmaster",
-	"the_mark": true
+	"the_mark": true,
+	"loudness": 2
   }
 }
