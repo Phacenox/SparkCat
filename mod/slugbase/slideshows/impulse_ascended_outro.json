@@ -1,0 +1,52 @@
+{
+	"id": "impulse_ascended_outro",
+	"next_process": "Statistics",
+	"music": {
+		"name": "RW_Outro_Theme",
+		"fade_in": 10
+	},
+	"scenes":[
+		{
+			"name": "impulse-outro 1 - left swim",
+			"scene_folder": "slideshows/impulse-ascended/impulse-outro 1 - left swim",
+			"fade_in_start": 0,
+			"fade_out_start": 19.5,
+			"images": [
+				{"name": "1 - foregroundbloom", "pos": [-46, -325], "depth": 3, "shader": "LightEdges"},
+				{"name": "2 - specks", "pos": [31, -30], "depth": 2, "shader": "LightEdges"},
+				{"name": "3 - catsbloom", "pos": [-130, -30], "depth": 1.2, "shader": "LightEdges"},
+				{"name": "4 - bluebloom", "pos": [-68, -73], "depth": 1.1, "shader": "LightEdges"},
+				{"name": "5 - mainslugcat", "pos": [698, 296], "depth": 1, "shader": "LightEdges"}
+			],
+			"camera_path": [[100, 15, 0], [-280.7, 5, 0.5]]
+		},
+		{
+			"name": "impulse-outro 2 - up swim",
+			"scene_folder": "slideshows/impulse-ascended/impulse-outro 2 - up swim",
+			"fade_in_start": 20.5,
+			"fade_out_start": 37.5,
+			"images": [
+				{"name": "7 - swimbkg", "pos": [-213, -105], "depth": 3, "shader": "LightEdges"},
+				{"name": "5 - mainswimmer", "pos": [514, 32], "depth": 1.2, "shader": "LightEdges"},
+				{"name": "3 - slugcatbloomoverlay", "pos": [469, -20], "depth": 1.1, "shader": "SoftLight"},
+				{"name": "4 - slugcatbloomlighten", "pos": [478, 17], "depth": 1, "shader": "Lighten"},
+				{"name": "2 - bubbles", "pos": [-187, -131], "depth": 0.3, "shader": "LightEdges"}
+			],
+			"camera_path": [[50, 65, 0], [-28.7, -85, 0.5]]
+		},
+		{
+			"name": "impulse-outro 3 - face",
+			"scene_folder": "slideshows/impulse-ascended/impulse-outro 3 - face",
+			"fade_in_start": 40.5,
+			"fade_out_start": 48,
+			"images": [
+				{"name": "5 - cloudsb", "pos": [-77, -71], "depth": 3, "shader": "LightEdges"},
+				{"name": "4 - cloudsa", "pos": [-90, -49], "depth": 2, "shader": "LightEdges"},
+				{"name": "3 - bloomlights", "pos": [26, 6], "depth": 1.6, "shader": "SoftLight"},
+				{"name": "2 - facecloseup", "pos": [43, -59], "depth": 1, "shader": "LightEdges"},
+				{"name": "1 - facebloom", "pos": [5, -80], "depth": 0.9, "shader": "SoftLight"}
+			],
+			"camera_path": [[100, 15, 0], [-28.7, 5, 0.5]]
+		}
+	]
+}

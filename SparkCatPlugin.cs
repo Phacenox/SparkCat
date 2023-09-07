@@ -10,6 +10,7 @@ using MoreSlugcats;
 using SlugBase.Assets;
 using Menu;
 using System.Reflection;
+using System.Security.AccessControl;
 
 [module: UnverifiableCode]
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -28,7 +29,7 @@ namespace SparkCat
     {
         public const string PLUGIN_GUID = "phace.impulse";
         public const string PLUGIN_NAME = "Impulse";
-        public const string PLUGIN_VERSION = "0.4.6";
+        public const string PLUGIN_VERSION = "0.5.0";
         public const string SLUGCAT_NAME = "sparkcat";
 
         public static readonly PlayerFeature<float> SparkJump = PlayerFloat("spark_jump");
@@ -124,12 +125,11 @@ namespace SparkCat
 
         private void CreatureViolenceHook(On.Creature.orig_Violence orig, Creature self, BodyChunk source, Vector2? directionAndMomentum, BodyChunk hitChunk, PhysicalObject.Appendage.Pos hitAppendage, Creature.DamageType type, float damage, float stunBonus)
         {
-            if(self is Player p && SparkJump.TryGet(p, out float jumpStrength) && jumpStrength > 0)
+            if (self is Player p && SparkJump.TryGet(p, out float jumpStrength) && jumpStrength > 0)
             {
-                if(type == Creature.DamageType.Electric && !(source.owner is ElectricRubbish.ElectricRubbish))
+                if (type == Creature.DamageType.Electric && (source == null || !(source.owner is ElectricRubbish.ElectricRubbish)))
                 {
                     states[p].rechargeZipStorage(4);
-                    damage /= 2;
                 }
             }
             orig(self, source, directionAndMomentum, hitChunk, hitAppendage, type, damage, stunBonus);

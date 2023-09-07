@@ -163,8 +163,19 @@ namespace SparkCat
 
 
         bool custom_input_last = false;
+        bool overcharge = false;
         public void ClassMechanicsSparkCat(float zipLength)
         {
+            overcharge = false;
+            if (player.room.roomSettings != null && player.room.roomSettings.GetEffectAmount(RoomSettings.RoomEffect.Type.ElectricDeath) > 0.5f)
+            {
+                if(player.room.game.globalRain != null && player.room.game.globalRain.Intensity > 0)
+                {
+                    //Debug.Log(player.room.game.globalRain.Intensity);
+                    overcharge = true;
+                }
+            }
+
             this.zipLength = zipLength;
             #region recharging
             if (player.canJump > 0)
@@ -174,15 +185,21 @@ namespace SparkCat
                 //assume encapsulating check means inside iterator. TODO?: make more specific
                 iterator_recharge--;
                 recharge_timer--;
+            }else if (overcharge)
+            {
+                iterator_recharge -= 5;
+                recharge_timer -= 10;
             }
             else if (grounded_since_last_zip)
             {
-                recharge_timer--;
+                recharge_timer -= 1;
             }
             if (iterator_recharge <= 0 && zipChargesStored < maxZipChargesStored)
             {
                 zipChargesStored++;
                 iterator_recharge = 30;
+                if (overcharge)
+                    iterator_recharge = 10;
             }
             if (zipChargesStored > 0 && recharge_timer <= 0 && zipChargesReady < 2)
             {
