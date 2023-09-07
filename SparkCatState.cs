@@ -226,8 +226,8 @@ namespace SparkCat
             releaselock = 20;
             //recharge
             if (!player.submerged
-                && (player.canJump > 0 || player.bodyMode == BodyModeIndex.CorridorClimb)
-                && ((player.input[0].y < 0 && player.input[0].x == 0 && player.bodyMode != BodyModeIndex.CorridorClimb)
+                && (player.canJump > 0 || player.firstChunk.pos.y - player.lastGroundY < 30 || player.bodyMode == BodyModeIndex.CorridorClimb)
+                && ((player.input[0].y < 0 && player.bodyMode != BodyModeIndex.CorridorClimb)
                     || (player.bodyMode == BodyModeIndex.Crawl || player.bodyMode == BodyModeIndex.CorridorClimb || player.bodyMode == BodyModeIndex.ClimbingOnBeam) && player.input[0].x == 0 && player.input[0].y == 0))
             {
                 zipCooldown = 5;
