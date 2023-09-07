@@ -236,9 +236,11 @@ namespace SparkCat
                 && ((player.input[0].y < 0 && player.bodyMode != BodyModeIndex.CorridorClimb && !ZeroG(player))
                     || (player.bodyMode == BodyModeIndex.Crawl || player.bodyMode == BodyModeIndex.CorridorClimb || player.bodyMode == BodyModeIndex.ClimbingOnBeam) && player.input[0].x == 0 && player.input[0].y == 0))
             {
-                zipCooldown = 5;
+                zipCooldown = 20;
                 if (player.playerState.foodInStomach > 0 && rechargeZipStorage(ChargeablesState.foodvalue) > 0)
                     player.SubtractFood(1);
+                else if (player.room.game.IsArenaSession)
+                    rechargeZipStorage(1);
                 else
                 {
                     DoFailureEffect();
