@@ -1,0 +1,14 @@
+{
+	"id": "impulse_selectscreen_ascended",
+	"scene_folder": "scenes/impulse-ascended",
+	"images": [
+		{ "name": "impulse bkg", "pos": [330, 62], "depth": 3.2, "shader": "Normal"},
+		{ "name": "impulse a",    "pos": [557, 169], "depth": 3.0, "shader": "Normal" },
+		{ "name": "impulse b",    "pos": [574, 154], "depth": 2.6, "shader": "SoftLight" }
+	],
+	"idle_depths": [ 2.2 ],
+	"glow_pos": [688, 484],
+	"mark_pos": [689, 583],
+	"slugcat_depth": 2.2
+
+}

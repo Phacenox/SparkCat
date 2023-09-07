@@ -17,6 +17,7 @@
       }
     ],
 	"select_menu_scene": "impulse_selectscreen",
+	"select_menu_scene_ascended": "impulse_selectscreen_ascended",
 	"sleep_scene": "impulse_sleepscreen",
     "start_room": ["SS_S05", "SS_A04"],
 	"world_state": ["Spear", "Red"],

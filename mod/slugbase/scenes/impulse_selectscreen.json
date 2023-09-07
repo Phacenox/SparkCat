@@ -9,8 +9,8 @@
 		{ "name": "Front",    "pos": [295, 135], "depth": 1.6, "shader": "Basic" }
 	],
 	"idle_depths": [ 2.2 ],
-	"glow_pos": [688, 484],
-	"mark_pos": [689, 583],
+	"glow_pos": [120, -60],
+	"mark_pos": [120, -60],
 	"select_menu_pos": [0, 0],
 	"slugcat_depth": 2.2
 }

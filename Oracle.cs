@@ -18,7 +18,7 @@ namespace SparkCat
         {
             public Conversation self;
             public ConversationMacro(Conversation self) { this.self = self; }
-            public void Say(string text)
+            public void Say(string text, int linger = 0)
             {
                 self.events.Add(new Conversation.TextEvent(self, 0, text, 0));
             }
@@ -41,8 +41,7 @@ namespace SparkCat
 
             if (!self.owner.playerEnteredWithMark)
             {
-                macro.Say("Figures.");
-                macro.Wait(20);
+                macro.Say("Figures.", 20);
                 macro.Say("Returning to me once again, and somehow losing your mark... You are surely committed to being as annoying as possible.");
             }
             else
@@ -50,20 +49,15 @@ namespace SparkCat
                 macro.Wait(10);
                 macro.Say("...");
                 macro.Wait(20);
-                macro.Say("And so it returns. Of course.");
-                macro.Wait(20);
-                macro.Say("Why do you insist on pestering me? I am far too busy for this nonsense...");
+                macro.Say("And so it returns. Of course.", 40);
+                macro.Say("Why do you insist on pestering me? I am far too busy for this nonsense...", 20);
             }
-            macro.Wait(70);
-            macro.Say("Hear me well, creature.");
-            macro.Wait(20);
-            macro.Say("Think of all that I have gifted you...");
-            macro.Wait(15);
-            macro.Say("The privilege to explore my can to your hearts content... and that mark.");
-            macro.Wait(15);
-            macro.Say("I can easily take it all away.");
-            macro.Wait(15);
-            macro.Say("I can no longer stomach your interruptions. Should you return to me again, I will not be so generous.");
+            macro.Wait(120);
+            macro.Say("Hear me well, creature.", 20);
+            macro.Say("Think of all that I have gifted you...", 15);
+            macro.Say("Knowledge, food, shelter, the privilege to explore even the deepest reaches of my can...", 15);
+            macro.Say("And yet you continue to return here to my chamber; the only place where you are forbidden.", 15);
+            macro.Say("You should understand that my work requires my full concentration...<LINE>I can no longer stomach your interruptions. Should you return to me again, I will not be so generous.");
             macro.Say("Get out.");
         }
         //TODO: Save this.
@@ -88,7 +82,7 @@ namespace SparkCat
             if (self.oracle.room.game.GetStorySession.saveState.miscWorldSaveData.SSaiConversationsHad / 100 == 0)
             {
                 self.dialogBox.Interrupt("Oh, its you! ...Did Pebbles kick you out again?", 20);
-                self.dialogBox.NewMessage("I know it's in your nature, but it would probably be best if you stopped going back to him.", 10);
+                self.dialogBox.NewMessage("I can see it's in your nature, but it would probably be best if you stopped going back to him.", 10);
                 self.dialogBox.NewMessage("He's been very... distracted, lately. I'm worried that he might do something to you if you continue bothering him.", 15);
                 self.dialogBox.NewMessage("I don't know what it is that drives you to hop between us so often. Please, for your sake, you should find a different iterator to visit.", 10);
                 self.dialogBox.NewMessage("That being said, you're welcome to stay with me for as long as you like. Just don't go eating too many of my neurons, OK?", 10);
