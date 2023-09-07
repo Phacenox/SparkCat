@@ -45,6 +45,8 @@ namespace SparkCat
         public bool graphic_teleporting = false;
         public int zipCooldown = 0;
 
+        static bool ZeroG(Player player) => player.bodyMode == BodyModeIndex.ZeroG || player.gravity <= 0.2f;
+
         public int rechargeZipStorage(int max_available)
         {
             if (max_available == 0 || (maxZipChargesStored == zipChargesStored && zipChargesReady == 2)) return 0;
@@ -127,7 +129,7 @@ namespace SparkCat
                 var target_vel = (zipEndPos - zipStartPos).normalized * 3;
                 if (Mathf.Abs(target_vel.y) < 0.7f)
                     target_vel.y = 0.1f * Mathf.Sign(player.bodyChunks[0].vel.y);
-                if (player.bodyMode == BodyModeIndex.ZeroG || player.gravity <= 0.1f)
+                if (ZeroG(player))
                     target_vel = zipInputDirection.ToVector2().normalized * 4;
 
                 for (int i = 0; i < player.bodyChunks.Length; i++)
@@ -149,7 +151,7 @@ namespace SparkCat
             if(zipFrame <= 0 && zipFrame > -5)
             {
                 //if not zero G, Y velocity is at least 1
-                if (!(player.bodyMode == BodyModeIndex.ZeroG || player.gravity <= 0.1f))
+                if (!ZeroG(player))
                 {
                     player.bodyChunks[0].vel.y = Mathf.Max(player.bodyChunks[0].vel.y, 0f);
                     player.bodyChunks[1].vel.y = Mathf.Max(player.bodyChunks[1].vel.y, 0f);
@@ -159,6 +161,7 @@ namespace SparkCat
             }
         }
 
+
         bool custom_input_last = false;
         public void ClassMechanicsSparkCat(float zipLength)
         {
@@ -166,7 +169,7 @@ namespace SparkCat
             #region recharging
             if (player.canJump > 0)
                 grounded_since_last_zip = true;
-            if (player.bodyMode == BodyModeIndex.ZeroG || player.gravity <= 0.2f && zipFrame < -5)
+            if (ZeroG(player) && zipFrame < -5)
             {
                 //assume encapsulating check means inside iterator. TODO?: make more specific
                 iterator_recharge--;
@@ -225,16 +228,23 @@ namespace SparkCat
             if (!desires_sparkjump || zipping || player.eatMeat >= 20 || player.maulTimer >= 15 || !player.Consious || zipCooldown > 0) return;
             releaselock = 20;
             //recharge
+            //known issue: the units_off_ground check prevents down-zipping in that range. (regardless of x position)
+            //this should be fine, nobody should be trying to do that
+            var units_off_ground = player.firstChunk.pos.y - player.lastGroundY;
             if (!player.submerged
-                && (player.canJump > 0 || player.firstChunk.pos.y - player.lastGroundY < 30 || player.bodyMode == BodyModeIndex.CorridorClimb)
-                && ((player.input[0].y < 0 && player.bodyMode != BodyModeIndex.CorridorClimb)
+                && (player.canJump > 0 || (units_off_ground < 20 && units_off_ground >= 0) || player.bodyMode == BodyModeIndex.CorridorClimb)
+                && ((player.input[0].y < 0 && player.bodyMode != BodyModeIndex.CorridorClimb && !ZeroG(player))
                     || (player.bodyMode == BodyModeIndex.Crawl || player.bodyMode == BodyModeIndex.CorridorClimb || player.bodyMode == BodyModeIndex.ClimbingOnBeam) && player.input[0].x == 0 && player.input[0].y == 0))
             {
                 zipCooldown = 5;
                 if (player.playerState.foodInStomach > 0 && rechargeZipStorage(ChargeablesState.foodvalue) > 0)
                     player.SubtractFood(1);
                 else
+                {
                     DoFailureEffect();
+                    if (player.playerState.foodInStomach <= 0 && zipChargesStored < maxZipChargesStored)
+                        player.room.game.cameras[0].hud.foodMeter.refuseCounter = 50;
+                }
             }//zip
             else
             {

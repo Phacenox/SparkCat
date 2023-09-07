@@ -66,6 +66,8 @@ namespace SparkCat
             chargevalue -= state.zipChargesStored;
             if (state.player != null)
                 chargevalue -= state.player.FoodInStomach * foodvalue;
+            if(chargevalue > 0)
+                state.player.room.game.cameras[0].hud.foodMeter.refuseCounter = 50;
             return chargevalue <= 0;
         }
         //assumes hasenoughfood
