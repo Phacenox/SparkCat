@@ -39,7 +39,10 @@ namespace SparkCat
                         {
                             chargeTarget = self.grasps[i].grabbed;
                             if (i == 0 && chargeTarget is ElectricSpear es && es.abstractSpear.electricCharge > 0 && self.grasps[1] != null && self.grasps[1].grabbed is Rock)
+                            {
                                 chargeTarget = self.grasps[1].grabbed;
+                                chargeGrasp = 1;
+                            }
                             self.eatExternalFoodSourceCounter = 4;
                             self.handOnExternalFoodSource = chargeTarget.bodyChunks[0].pos;
                             chargeHeldItem = 4;
@@ -109,6 +112,16 @@ namespace SparkCat
                 {
                     if (state.rechargeZipStorage(cost) > 0)
                         SetCharge(chargeTarget, 0);
+                    else
+                        state.DoFailureEffect();
+                }else if(chargeTarget is ElectricSpear && ChargeOf(chargeTarget) > 0)
+                {
+                    if (state.rechargeZipStorage(2) > 0)
+                        if (Random.value < 0.20)
+                        {
+                            state.rechargeZipStorage(12);
+                            (chargeTarget as ElectricSpear).ExplosiveShortCircuit();
+                        }
                     else
                         state.DoFailureEffect();
                 }
