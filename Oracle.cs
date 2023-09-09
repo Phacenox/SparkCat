@@ -20,7 +20,7 @@ namespace SparkCat
             public ConversationMacro(Conversation self) { this.self = self; }
             public void Say(string text, int linger = 0)
             {
-                self.events.Add(new Conversation.TextEvent(self, 0, text, 0));
+                self.events.Add(new Conversation.TextEvent(self, 0, text, linger));
             }
             public void Wait(int physFrames)
             {
@@ -49,18 +49,19 @@ namespace SparkCat
                 macro.Wait(10);
                 macro.Say("...");
                 macro.Wait(20);
-                macro.Say("And so it returns. Of course.", 40);
-                macro.Say("Why do you insist on pestering me? I am far too busy for this nonsense...", 20);
+                macro.Say("And so it returns. Of course...", 40);
+                macro.Say("Why do you insist on pestering me? I am far too busy for this nonsense.", 20);
             }
             macro.Wait(120);
             macro.Say("Hear me well, creature.", 20);
             macro.Say("Think of all that I have gifted you...", 15);
             macro.Say("Knowledge, food, shelter, the privilege to explore even the deepest reaches of my can...", 15);
-            macro.Say("And yet you continue to return here to my chamber; the only place where you are forbidden.", 15);
-            macro.Say("You should understand that my work requires my full concentration...<LINE>I can no longer stomach your interruptions. Should you return to me again, I will not be so generous.");
-            macro.Say("Get out.");
+            macro.Say("Despite these gifts you continue to return here to my chamber; the only room in which you are forbidden.", 15);
+            macro.Say("You should understand by now that my work requires my full concentration... I can no longer stomach your interruptions.", 30);
+            macro.Say("Should you return to me again, I will not be so generous. But this time, all I will do is say it clearly:", 30);
+            macro.Say("Get out. Do not come back.", 10);
         }
-        //TODO: Save this.
+
         public static void SSSleepoverBehaviorctorHook(On.SSOracleBehavior.SSSleepoverBehavior.orig_ctor orig, SSOracleBehavior.SSSleepoverBehavior self, SSOracleBehavior owner)
         {
             orig(self, owner);
@@ -81,12 +82,11 @@ namespace SparkCat
 
             if (self.oracle.room.game.GetStorySession.saveState.miscWorldSaveData.SSaiConversationsHad / 100 == 0)
             {
-                self.dialogBox.Interrupt("Oh, its you! ...Did Pebbles kick you out again?", 20);
+                self.dialogBox.Interrupt("Oh, its you! ...Did Pebbles kick you out again?", 40);
                 self.dialogBox.NewMessage("I can see it's in your nature, but it would probably be best if you stopped going back to him.", 10);
-                self.dialogBox.NewMessage("He's been very... distracted, lately. I'm worried that he might do something to you if you continue bothering him.", 15);
+                self.dialogBox.NewMessage("Lately he's been very... distracted. I'm worried that he might do something to you if you continue bothering him.", 15);
                 self.dialogBox.NewMessage("I don't know what it is that drives you to hop between us so often. Please, for your sake, you should find a different iterator to visit.", 10);
-                self.dialogBox.NewMessage("That being said, you're welcome to stay with me for as long as you like. Just don't go eating too many of my neurons, OK?", 10);
-                self.dialogBox.NewMessage("If you're patient, perhaps someday I will have a task for you.", 10);
+                self.dialogBox.NewMessage("That being said, you're welcome to stay with me for as long as you like. Just don't go eating too many of my neurons, okay?", 10);
             }
             else if (Random.value < 0.3f)
             {

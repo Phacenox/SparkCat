@@ -137,7 +137,6 @@ namespace SparkCat
 
         public override void DrawSprites(RoomCamera.SpriteLeaser sLeaser, RoomCamera rCam, float timeStacker, Vector2 camPos)
         {
-
             if (state.graphic_teleporting)
                 timeStacker = 1;
 

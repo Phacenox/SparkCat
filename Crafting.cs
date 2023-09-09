@@ -40,6 +40,8 @@
                 var state = Plugin.states[self];
 
                 int cost = ChargeablesState.spearChargeValue - ChargeablesState.rubbishChargeValue;
+                if (state.player.room.game.IsArenaSession)
+                    cost = 1;
                 if (!ChargeablesState.HasEnoughCharge(state, cost))
                 {
                     state.DoFailureEffect();
