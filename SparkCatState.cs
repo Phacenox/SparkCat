@@ -178,7 +178,8 @@ namespace SparkCat
 
             this.zipLength = zipLength;
             #region recharging
-            if (player.canJump > 0)
+            Debug.Log(player.bodyMode);
+            if (player.canJump > 0 || player.bodyMode == BodyModeIndex.ClimbingOnBeam)
                 grounded_since_last_zip = true;
             if (ZeroG(player) && zipFrame < -5)
             {

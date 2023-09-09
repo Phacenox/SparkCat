@@ -1,7 +1,7 @@
 {
 	"id": "phace.impulse",
 	"name": "The Impulse",
-	"version": "0.5.1",
+	"version": "0.5.2",
 	"authors": "Phace",
 	"description": "Adds a new playable slugcat: The Impulse."
     "tags": ["Campaigns", "Custom Slugcat"],
