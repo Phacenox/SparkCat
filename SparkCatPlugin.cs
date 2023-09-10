@@ -11,6 +11,7 @@ using SlugBase.Assets;
 using Menu;
 using System.Reflection;
 using System.Security.AccessControl;
+using RWCustom;
 
 [module: UnverifiableCode]
 #pragma warning disable CS0618 // Type or member is obsolete
@@ -76,13 +77,29 @@ namespace SparkCat
             On.SSOracleBehavior.SSSleepoverBehavior.ctor += Oracle.SSSleepoverBehaviorctorHook;
 
             On.SSOracleBehavior.Update += Oracle.SSUpdateHook;
+            On.Menu.MainMenu.ctor += MainMenuCheckDependency;
 
             Enums.Initialize();
+        }
+
+        private void MainMenuCheckDependency(On.Menu.MainMenu.orig_ctor orig, MainMenu self, ProcessManager manager, bool showRegionSpecificBkg)
+        {
+            orig(self, manager, showRegionSpecificBkg);
+            Version v = Version.Parse(ElectricRubbish.ElectricRubbishMain.plugin_live_version);
+            if(v < new Version(1, 3, 2))
+            {
+                self.popupAlert = new DialogBoxNotify(self, self.pages[0],
+                    "Impulse: Dependency version too low. ElectricRubbish is out of date. Please update. Req: 1.3.2 Was: " + v, "ALERT",
+                    new Vector2(manager.rainWorld.options.ScreenSize.x / 2f - 240f + (1366f - manager.rainWorld.options.ScreenSize.x) / 2f, 284f), new Vector2(480f, 180f), false);
+                self.pages[0].subObjects.Add(self.popupAlert);
+                self.manager.rainWorld.HandleLog("Impulse: ElectricRubbish is out of date. Should be at least 1.3.2, was " + v + ".", "SparkCatPlugin.InitHook", LogType.Error);
+            }
         }
 
         private void InitHook(On.RainWorld.orig_OnModsInit orig, RainWorld self)
         {
             orig(self);
+
             config = new SparkCatOptions();
             MachineConnector.SetRegisteredOI(PLUGIN_GUID, config);
 
