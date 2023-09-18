@@ -74,8 +74,10 @@ namespace SparkCat
             if (player.wantToJump > 0) player.wantToJump = 0;
             zipChargesReady--;
             zipStartPos = player.firstChunk.pos;
-            float zipDiagScalar = (Mathf.Abs(zipInputDirection.x) + Mathf.Abs(zipInputDirection.y)) >= 2 ? 0.8f : 1;
-            zipEndPos = zipStartPos + zipInputDirection.ToVector2().normalized * zipLength * zipDiagScalar;
+            float zipScalar = (Mathf.Abs(zipInputDirection.x) + Mathf.Abs(zipInputDirection.y)) >= 2 ? 0.8f : 1;
+            if (player.grabbedBy.Count > 0)
+                zipScalar *= 0.3f;
+            zipEndPos = zipStartPos + zipInputDirection.ToVector2().normalized * zipLength * zipScalar;
 
             IntVector2 tilestart = player.room.GetTilePosition(player.firstChunk.pos);
             IntVector2 tileend = player.room.GetTilePosition(zipEndPos);
