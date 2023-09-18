@@ -85,11 +85,11 @@ namespace SparkCat
             
 
             OpCheckBox check1 = new OpCheckBox(No_Food_Cost, new Vector2(300, 510));
-            check1.description = "The food cost for recharging is removed.";
+            check1.description = "Removes the food cost for recharging and for all crafts.";
             OpLabel checklabel1 = new OpLabel(330f, 510f, "Free recharge.");
 
             OpCheckBox check2 = new OpCheckBox(Always_Overcharge, new Vector2(300, 480));
-            check2.description = "Zips recharge very quickly, even in the air.";
+            check2.description = "Zips recharge extremely quickly, even in the air.";
             OpLabel checklabel2 = new OpLabel(330f, 480f, "Always overcharged.");
 
             OpDragger dragger = new OpDragger(Zip_Length, new Vector2(300, 450));
@@ -97,7 +97,7 @@ namespace SparkCat
             dragger.description = "Only affects Impulse. Default is 140.";
 
             OpCheckBox check4 = new OpCheckBox(Zip_Through_Walls, new Vector2(300, 420));
-            check4.description = "Zips can travel through walls.";
+            check4.description = "Zipping can displace a slugcat through walls, provided there is space on the other side.";
             OpLabel checklabel4 = new OpLabel(330f, 420f, "Zip through walls.");
 
 
