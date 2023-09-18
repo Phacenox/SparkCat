@@ -85,25 +85,37 @@ namespace SparkCat
             player.room.RayTraceTilesList(tilestart.x, tilestart.y, tileend.x, tileend.y, ref tiles);
             if (SparkCatOptions.ZipThroughWalls)
             {
+                bool found_free = false;
                 for (int i = tiles.Count - 1; i >= 0; i--)
                 {
                     if (!player.room.GetTile(tiles[i]).Solid)
                     {
                         zipEndPos = player.room.MiddleOfTile(tiles[i]);
+                        found_free = true;
                         break;
                     }
                 }
+                if (!found_free)
+                    zipEndPos = zipStartPos;
             }
             else
             {
-                for (int i = 1; i < tiles.Count; i++)
+                bool found_solid = false;
+                int submerged_tiles = 0;
+                for (int i = 1; i < tiles.Count - submerged_tiles; i++)
                 {
                     if (player.room.GetTile(tiles[i]).Solid)
                     {
                         zipEndPos = player.room.MiddleOfTile(tiles[i - 1]);
+                        found_solid = true;
                         break;
                     }
+                    Vector2 tilepos = player.room.MiddleOfTile(tiles[i]);
+                    if (player.room.PointSubmerged(tilepos))
+                        submerged_tiles++;
                 }
+                if (!found_solid && submerged_tiles > 0)
+                    zipEndPos = player.room.MiddleOfTile(tiles[tiles.Count - submerged_tiles - 1]);
             }
 
             zipping = true;
@@ -167,10 +179,16 @@ namespace SparkCat
             if(zipFrame <= 0 && zipFrame > -5)
             {
                 //if not zero G, Y velocity is at least 1
-                if (!ZeroG(player))
+                if (!ZeroG(player) && !player.submerged)
                 {
                     player.bodyChunks[0].vel.y = Mathf.Max(player.bodyChunks[0].vel.y, 0f);
                     player.bodyChunks[1].vel.y = Mathf.Max(player.bodyChunks[1].vel.y, 0f);
+                }
+            }
+            if (zipFrame < 0 && zipFrame > -5)
+            {
+                if (!ZeroG(player) && !player.submerged)
+                {
                     player.customPlayerGravity = 0f;
                     player.SetLocalAirFriction(0.7f);
                 }
@@ -191,7 +209,7 @@ namespace SparkCat
 
             this.zipLength = zipLength;
             #region recharging
-            if (player.canJump > 0 || player.bodyMode == BodyModeIndex.ClimbingOnBeam)
+            if (player.canJump > 0 || player.bodyMode == BodyModeIndex.ClimbingOnBeam || player.bodyMode == BodyModeIndex.Swimming)
                 grounded_since_last_zip = true;
             if (ZeroG(player) && zipFrame < -5)
             {
