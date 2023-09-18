@@ -81,12 +81,26 @@ namespace SparkCat
             IntVector2 tileend = player.room.GetTilePosition(zipEndPos);
             List<IntVector2> tiles = new List<IntVector2>();
             player.room.RayTraceTilesList(tilestart.x, tilestart.y, tileend.x, tileend.y, ref tiles);
-            for (int i = 1; i < tiles.Count; i++)
+            if (SparkCatOptions.ZipThroughWalls)
             {
-                if (player.room.GetTile(tiles[i]).Solid)
+                for (int i = tiles.Count - 1; i >= 0; i--)
                 {
-                    zipEndPos = player.room.MiddleOfTile(tiles[i - 1]);
-                    break;
+                    if (!player.room.GetTile(tiles[i]).Solid)
+                    {
+                        zipEndPos = player.room.MiddleOfTile(tiles[i]);
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 1; i < tiles.Count; i++)
+                {
+                    if (player.room.GetTile(tiles[i]).Solid)
+                    {
+                        zipEndPos = player.room.MiddleOfTile(tiles[i - 1]);
+                        break;
+                    }
                 }
             }
 
@@ -168,13 +182,10 @@ namespace SparkCat
         {
             overcharge = false;
             if (player.room.roomSettings != null && player.room.roomSettings.GetEffectAmount(RoomSettings.RoomEffect.Type.ElectricDeath) > 0.5f)
-            {
                 if(player.room.game.globalRain != null && player.room.game.globalRain.Intensity > 0)
-                {
-                    //Debug.Log(player.room.game.globalRain.Intensity);
                     overcharge = true;
-                }
-            }
+            if (SparkCatOptions.AlwaysOvercharge)
+                overcharge = true;
 
             this.zipLength = zipLength;
             #region recharging
@@ -248,13 +259,13 @@ namespace SparkCat
             //known issue: the units_off_ground check prevents down-zipping in that range. (regardless of x position)
             //this should be fine, nobody should be trying to do that
             var units_off_ground = player.firstChunk.pos.y - player.lastGroundY;
-            if (!player.submerged
+            if (!player.submerged && !overcharge
                 && (player.canJump > 0 || (units_off_ground < 20 && units_off_ground >= 0) || player.bodyMode == BodyModeIndex.CorridorClimb)
                 && ((player.input[0].y < 0 && player.bodyMode != BodyModeIndex.CorridorClimb && !ZeroG(player))
                     || (player.bodyMode == BodyModeIndex.Crawl || player.bodyMode == BodyModeIndex.CorridorClimb || player.bodyMode == BodyModeIndex.ClimbingOnBeam) && player.input[0].x == 0 && player.input[0].y == 0))
             {
                 zipCooldown = 20;
-                if (player.playerState.foodInStomach > 0 && rechargeZipStorage(ChargeablesState.foodvalue) > 0)
+                if (player.playerState.foodInStomach > 0 && rechargeZipStorage(ChargeablesState.foodvalue) > 0 && !SparkCatOptions.NoFoodCost)
                     player.SubtractFood(1);
                 else if (player.room.game.IsArenaSession)
                     rechargeZipStorage(1);

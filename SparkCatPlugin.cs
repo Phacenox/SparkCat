@@ -30,7 +30,7 @@ namespace SparkCat
     {
         public const string PLUGIN_GUID = "phace.impulse";
         public const string PLUGIN_NAME = "Impulse";
-        public const string PLUGIN_VERSION = "0.5.3";
+        public const string PLUGIN_VERSION = "0.6.0";
         public const string SLUGCAT_NAME = "sparkcat";
 
         public static readonly PlayerFeature<float> SparkJump = PlayerFloat("spark_jump");
@@ -85,7 +85,14 @@ namespace SparkCat
         private void MainMenuCheckDependency(On.Menu.MainMenu.orig_ctor orig, MainMenu self, ProcessManager manager, bool showRegionSpecificBkg)
         {
             orig(self, manager, showRegionSpecificBkg);
-            Version v = Version.Parse(ElectricRubbish.ElectricRubbishMain.plugin_live_version);
+
+            var er = ModManager.ActiveMods.Find(mod => mod.id == "phace.electricrubbish");
+            if(er == null)
+            {
+                Debug.LogError("Impulse: Electric Rubbish mod Not Found");
+                return;
+            }
+            Version v = Version.Parse(er.version);
             if(v < new Version(1, 3, 2))
             {
                 self.popupAlert = new DialogBoxNotify(self, self.pages[0],
@@ -201,7 +208,7 @@ namespace SparkCat
             if (SparkJump.TryGet(self, out float jumpStrength) && jumpStrength > 0)
             {
                 states[self].chargeablesState.Update();
-                states[self].ClassMechanicsSparkCat(jumpStrength);
+                states[self].ClassMechanicsSparkCat(self.SlugCatClass.value == SLUGCAT_NAME ? SparkCatOptions.ZipLength : jumpStrength);
                 states[self].Update();
                 states[self].DoZip();
             }

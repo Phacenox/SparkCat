@@ -38,6 +38,7 @@ namespace SparkCat
                         if (self.grasps[i] != null && (self.grasps[i].grabbed is ElectricRubbish.ElectricRubbish || self.grasps[i].grabbed is ElectricSpear || self.grasps[i].grabbed is Rock))
                         {
                             chargeTarget = self.grasps[i].grabbed;
+                            chargeGrasp = i;
                             if (i == 0 && chargeTarget is ElectricSpear es && es.abstractSpear.electricCharge > 0 && self.grasps[1] != null && self.grasps[1].grabbed is Rock)
                             {
                                 chargeTarget = self.grasps[1].grabbed;
@@ -46,7 +47,6 @@ namespace SparkCat
                             self.eatExternalFoodSourceCounter = 4;
                             self.handOnExternalFoodSource = chargeTarget.bodyChunks[0].pos;
                             chargeHeldItem = 4;
-                            chargeGrasp = i;
                             break;
                         }
                     }
@@ -63,6 +63,8 @@ namespace SparkCat
 
         public static bool HasEnoughCharge(SparkCatState state, int chargevalue)
         {
+            if (SparkCatOptions.NoFoodCost)
+                return true;
             if (state.player.room.game.IsArenaSession)
                 return state.zipChargesReady >= chargevalue;
             chargevalue -= state.zipChargesReady;
@@ -76,6 +78,8 @@ namespace SparkCat
         //assumes hasenoughfood
         public static void SpendCharge(SparkCatState state, int chargevalue)
         {
+            if (SparkCatOptions.NoFoodCost)
+                return;
             if (state.player.room.game.IsArenaSession)
             {
                 state.zipChargesReady -= chargevalue;
