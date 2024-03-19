@@ -30,7 +30,7 @@ namespace SparkCat
     {
         public const string PLUGIN_GUID = "phace.impulse";
         public const string PLUGIN_NAME = "Impulse";
-        public const string PLUGIN_VERSION = "0.6.2";
+        public const string PLUGIN_VERSION = "0.6.3";
         public const string SLUGCAT_NAME = "sparkcat";
 
         public static readonly PlayerFeature<float> SparkJump = PlayerFloat("spark_jump");
@@ -130,7 +130,7 @@ namespace SparkCat
         {
             if (SparkJump.TryGet(self, out float jumpStrength) && jumpStrength > 0)
             {
-                states[self].ReleaseObjectHook(orig, self, grasp, eu);
+                states[self].ReleaseObjectHook(grasp);
             }
             else
             {

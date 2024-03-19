@@ -5,13 +5,13 @@ namespace SparkCat
 {
     public class ChargeablesState
     {
-        SparkCatState state;
+        readonly SparkCatState state;
         public ChargeablesState(SparkCatState state)
         {
             this.state = state;
         }
 
-        Creature.Grasp[] grasps = new Creature.Grasp[2];
+        readonly Creature.Grasp[] grasps = new Creature.Grasp[2];
         int chargeHeldItem = -1;
         PhysicalObject chargeTarget;
         int chargeGrasp;
@@ -35,7 +35,7 @@ namespace SparkCat
                 {
                     for(int i = 0; i < self.grasps.Length; i++)
                     {
-                        if (self.grasps[i] != null && (self.grasps[i].grabbed is ElectricRubbish.ElectricRubbish || self.grasps[i].grabbed is ElectricSpear || self.grasps[i].grabbed is Rock))
+                        if (self.grasps[i] != null && (self.grasps[i].grabbed is ElectricRubbish.ElectricRubbish || self.grasps[i].grabbed is ElectricSpear || self.grasps[i].grabbed.GetType() == typeof(Rock)))
                         {
                             chargeTarget = self.grasps[i].grabbed;
                             chargeGrasp = i;
@@ -94,8 +94,7 @@ namespace SparkCat
             {
                 iter++;
                 chargevalue -= foodvalue;
-                if(state.player != null)
-                    state.player.SubtractFood(1);
+                state.player?.SubtractFood(1);
                 if (chargevalue < 0)
                 {
                     state.zipChargesStored -= chargevalue;

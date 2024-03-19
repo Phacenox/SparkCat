@@ -306,8 +306,8 @@ namespace SparkCat
             }
         }
         int releaselock = 0;
-        int?[] wantsToRelease = new int?[input_frame_window];
-        public void ReleaseObjectHook(On.Player.orig_ReleaseObject orig, Player self, int grasp, bool eu)
+        readonly int?[] wantsToRelease = new int?[input_frame_window];
+        public void ReleaseObjectHook(int grasp)
         {
             wantsToRelease[0] = grasp;
         }
