@@ -1,10 +1,6 @@
 ﻿using Menu.Remix.MixedUI;
 using Menu.Remix.MixedUI.ValueTypes;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace SparkCat

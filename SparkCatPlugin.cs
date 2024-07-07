@@ -6,12 +6,7 @@ using System.Collections.Generic;
 using System.Security;
 using System.Security.Permissions;
 using System;
-using MoreSlugcats;
-using SlugBase.Assets;
 using Menu;
-using System.Reflection;
-using System.Security.AccessControl;
-using RWCustom;
 
 [module: UnverifiableCode]
 #pragma warning disable CS0618 // Type or member is obsolete

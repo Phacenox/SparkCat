@@ -1,16 +1,5 @@
-﻿using HUD;
-using MoreSlugcats;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using MoreSlugcats;
 using Random = UnityEngine.Random;
-using SlugBase.SaveData;
-using SlugBase.Features;
-using IL.Menu;
 
 namespace SparkCat
 {
