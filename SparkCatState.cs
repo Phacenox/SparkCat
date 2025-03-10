@@ -30,6 +30,7 @@ namespace SparkCat
         bool grounded_since_last_zip = false;
 
         int iterator_recharge = 30;
+        int iterator_absorbfood = 100;
 
         public bool zipping
         {
@@ -214,6 +215,7 @@ namespace SparkCat
             {
                 //assume encapsulating check means inside iterator. TODO?: make more specific
                 iterator_recharge--;
+                iterator_absorbfood--;
                 recharge_timer--;
             }else if (overcharge)
             {
@@ -230,6 +232,11 @@ namespace SparkCat
                 iterator_recharge = 30;
                 if (overcharge)
                     iterator_recharge = 10;
+            }
+            if (iterator_absorbfood <= 0)
+            {
+                iterator_absorbfood = 100;
+                player.AddFood(1);
             }
             if (zipChargesStored > 0 && recharge_timer <= 0 && zipChargesReady < 2)
             {
