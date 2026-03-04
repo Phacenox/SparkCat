@@ -9,8 +9,6 @@
 	* Press and hold grab and up while holding an electrified rubbish and a spear to craft an electric spear.
 
 ### Notes
-This mod is in early development.
+Note that its dependency, Electric Rubbish, will alter other slugcat's campaigns. Options to change this are available in the in-game mod settings.
 
-Note that its dependency, Electric Rubbish, will alter other slugcat's campaigns. Options to change this will be added in the future.
-
-I intend to add a custom region and campaign in the future, but no promises.
+I first intended to add a custom region and campaign, but I'm going to leave this project as-is.
